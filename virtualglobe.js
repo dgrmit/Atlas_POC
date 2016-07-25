@@ -33,6 +33,20 @@ function createGlobe(radius, wSeg, hSeg)
 
     globeMesh.name = "globeMesh";
 
+    globeMesh.rotation.y = 135 * Math.PI /180;
+    globeMesh.rotation.x = -25 * Math.PI /180;
+
     return globeMesh;
 
+}
+
+
+function createMap()
+{
+
+    var map = new THREE.TextureLoader().load("./textures/victoria_1m.jpg");
+    var material = new THREE.SpriteMaterial( {map:map, color: 0xffffff, fog: true});
+    var sprite = new THREE.Sprite(material);
+
+    return sprite;
 }
