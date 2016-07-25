@@ -1,0 +1,79 @@
+<!--
+Filename: Project.html
+Author: Daniel Guglielmi (#3423059)
+
+Description: Basic HTML web page to call the required JavaScript files
+
+All Project Files & Short Description
+
+
+Ancillary files
+jquery-1.12.3.min.js - JQuery library (used for notify.js plugin)
+notify.js - JQuery plugin used for visual notifications
+three.js - Three.js library
+trackballcontrols.js - Trackball control library file
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>RMIT Major Project</title>
+    <style type="text/css">
+        body
+        {
+            margin: 0;
+            padding: 0;
+            line-height: 1.5em;
+            font-family: Arial;
+            font-size: 12px;
+            background: rgba(112,112,112,0.3);
+        }
+
+        h1
+        {
+            margin: 10px;
+            padding: 2px 0;
+            font-size: 30px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        h2
+        {
+            margin: 10px;
+            padding: 2px 0;
+            font-size: 20px;
+            font-weight: normal;
+            text-align: center;
+        }
+
+        h3
+        {
+            margin: 10px;
+            padding: 2px 0;
+            font-size: 12px;
+            font-weight: normal;
+            text-align: center;
+            text-decoration: underline;
+        }
+
+    </style>
+</head>
+
+<body>
+    <h1>RMIT Major Project</h1>
+    <h2>Daniel Guglielmi #3423059</h2>
+
+    <div id="major_project">
+
+        <script src="./jquery-1.12.3.min.js"></script>
+        <script src="./notify.js"></script>
+        <script src="./three.js"></script>
+        <script src="./trackballcontrols.js"></script>
+        <script src="./virtualglobe.js"></script>
+        <script src="./init.js"></script>
+
+    </div>
+</body>
+</html>
