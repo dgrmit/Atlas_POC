@@ -47,6 +47,9 @@ spriteMap.visible = false;
 //Add light to camera so that light rotates with camera object
 camera.add(light);
 
+//Initialise the controls
+initControls();
+
 //Adds the various components to the scene and renders the scene
 scene.add(earthModel);
 scene.add(spriteMap);
@@ -98,17 +101,60 @@ function checkKeyPressed(key) {
     switch (key.keyCode) {
         case 49:
             //#1 key pressed
-            $.notify("Show 2D Map");
-            earthModel.position.x = -1;
-            earthModel.position.z = -1;
-            spriteMap.visible = true;
+            $.notify("Show 2D Map and hide globe");
+            showDialog();
+            earthModel.visible = false;
+          //  earthModel.position.x = -1;
+          //  earthModel.position.z = -1;
+          //  spriteMap.visible = true;
             break;
         case 50:
             //#2 key pressed
-            $.notify("Hide 2d Map");
-            earthModel.position.x = 0;
-            earthModel.position.z = 0;
-            spriteMap.visible = false;
+            $.notify("Show globe");
+            earthModel.visible = true;
+           // earthModel.position.x = 0;
+           // earthModel.position.z = 0;
+           // spriteMap.visible = false;
             break;
     }
 }
+
+//Function to open a JQuery Dialog box which loads a HTML page
+//which contains the interactive 2D atlas map
+function showDialog()
+{
+    var page = "./atlasmaps/test-map.html";
+
+    var $dialog = $('<div></div>')
+        .html('<iframe style="border: 0px; " src="' + page + '" width="100%" height="100%"></iframe>')
+        .dialog({
+            autoOpen: false,
+            modal: true,
+            height: 800,
+            width: 1200,
+            title: "Atlas Map"
+        });
+
+    $dialog.dialog('open');
+
+}
+
+function initControls()
+{
+    container = document.createElement( 'div' );
+    document.body.appendChild( container );
+
+    var buttonControls = document.createElement( 'div' );
+
+    buttonControls.style.position = 'absolute';
+    buttonControls.style.top = '10px';
+    buttonControls.style.width = '100%';
+    buttonControls.style.zIndex = '100';
+    buttonControls.style.textAlign = 'center';
+
+    container.appendChild( buttonControls );
+
+    buttonControls.innerHTML = '<button onclick="controls.reset()">Reset Camera</button>';
+
+}
+

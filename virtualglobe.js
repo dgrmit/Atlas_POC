@@ -40,7 +40,9 @@ function createGlobe(radius, wSeg, hSeg)
 
 }
 
-
+//This needs to be modified so that it loads a texture
+//onto a custom shape on the virtual globe, before the
+//animation starts
 function createMap()
 {
 
