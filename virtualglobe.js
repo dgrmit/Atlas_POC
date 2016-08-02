@@ -40,15 +40,63 @@ function createGlobe(radius, wSeg, hSeg)
 
 }
 
+function addMapObjects()
+{
+    var mapSection = createMapShape(3.5, 2, 11, 8);
+    var mapSection2 = createMapShape(3, 5, -30, -20);
+
+    mapSection.url = "./atlasmaps/test-map.html";
+    mapSection2.url = "./atlasmaps/test-map2.html";
+    scene.add(mapSection);
+    scene.add(mapSection2);
+
+    mapObjects.push(mapSection);
+    mapObjects.push(mapSection2);
+
+}
+
+
 //This needs to be modified so that it loads a texture
 //onto a custom shape on the virtual globe, before the
 //animation starts
-function createMap()
+function createMapShape(shapeWd, shapeHt, shapeRotX, shapeRotY)
 {
+    var numCollisions = 0;
 
-    var map = new THREE.TextureLoader().load("./textures/victoria_1m.jpg");
-    var material = new THREE.SpriteMaterial( {map:map, color: 0xffffff, fog: true});
-    var sprite = new THREE.Sprite(material);
+    var mapShape = new THREE.PlaneGeometry(shapeWd, shapeHt, 10, 10);
+    var mapShapeMaterial = new THREE.MeshBasicMaterial({color: Math.random() * 0xffffff, transparent: true, opacity: 0.5 });
+    var mapShapeMesh = new THREE.Mesh(mapShape, mapShapeMaterial);
 
-    return sprite;
+    mapShapeMesh.material.side = THREE.DoubleSide;
+    mapShapeMesh.position.z = 0;
+    mapShapeMesh.position.y = 0;
+    mapShapeMesh.rotation.x = shapeRotX * Math.PI /180;
+    mapShapeMesh.rotation.y = shapeRotY * Math.PI /180;
+
+
+    for (var vertexIndex = 0; vertexIndex < mapShapeMesh.geometry.vertices.length; vertexIndex++)
+    {
+        var localVertex = mapShapeMesh.geometry.vertices[vertexIndex].clone();
+        localVertex.z = 20;
+
+        var directionVector = new THREE.Vector3();
+        directionVector.subVectors(earthModel.position, localVertex);
+        directionVector.normalize();
+
+        var ray = new THREE.Raycaster(localVertex, directionVector);
+        var collisionResults = ray.intersectObject(earthModel);
+        numCollisions += collisionResults.length;
+
+        if (collisionResults.length > 0)
+        {
+            mapShapeMesh.geometry.vertices[vertexIndex].z = collisionResults[0].point.z + 0.1;
+        }
+
+    }
+
+    mapShapeMesh.geometry.verticesNeedUpdate = true;
+    mapShapeMesh.geometry.normalsNeedUpdate = true;
+
+    return mapShapeMesh;
+
 }
