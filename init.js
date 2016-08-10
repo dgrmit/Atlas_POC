@@ -27,10 +27,12 @@ var raycaster = new THREE.Raycaster();
 var mouse = new THREE.Vector2(), INTERSECTED;
 
 //Trackball controls
-var controls = new THREE.TrackballControls(camera);
+//var controls = new THREE.TrackballControls(camera);
+var controls = new THREE.OrthographicTrackballControls(camera);
 controls.rotateSpeed = 5.0;
 controls.minDistance = 40.0;
 controls.maxDistance = 150.0;
+
 //controls.addEventListener('change', render);
 animate();
 
@@ -49,6 +51,7 @@ var mapObjects = [];
 var earthModel = createGlobe(20, 64, 64);
 addMapObjects();
 
+
 //Add light to camera so that light rotates with camera object
 camera.add(light);
 
@@ -59,7 +62,7 @@ initControls();
 scene.add(earthModel);
 scene.add(ambLight);
 scene.add(camera);
-//scene.add(createAxes(50));
+scene.add(createAxes(50));
 renderer.render(scene, camera);
 
 
@@ -72,11 +75,13 @@ function initScene()
     document.body.appendChild(container);
     var scene = new THREE.Scene();
 
-    var camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.01, 500);
+    //var camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.01, 500);
+    var camera = new THREE.OrthographicCamera(window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, 1, 100);
     camera.position.z = 70;
+    camera.zoom = 12;
 
     var renderer = new THREE.WebGLRenderer();
-    renderer.setPixelRatio(window.devicePixelRatio);
+    //renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
     //renderer.setClearColor(0x404040, 1);
     container.appendChild(renderer.domElement);
@@ -109,6 +114,12 @@ function onWindowResize()
 {
 
     camera.aspect = window.innerWidth / window.innerHeight;
+    /*
+    camera.left = window.innerWidth / - 2;
+    camera.right = window.innerWidth / 2;
+    camera.top = window.innerHeight / 2;
+    camera.bottom = window.innerHeight / - 2;
+    */
     camera.updateProjectionMatrix();
 
     renderer.setSize( window.innerWidth, window.innerHeight );
@@ -183,7 +194,7 @@ function showDialog(mapURL)
         for (var i = 0; i < mapObjects.length;i++){
             mapObjects[i].visible = true;
         }
-    }
+    };
 
     var $dialog = $('<div></div>')
         .html('<iframe style="border: 0px; " src="' + page + '" width="100%" height="100%"></iframe>')
