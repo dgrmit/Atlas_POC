@@ -80,7 +80,7 @@ function initScene()
     camera.position.z = 70;
     camera.zoom = 12;
 
-    var renderer = new THREE.WebGLRenderer();
+    var renderer = new THREE.WebGLRenderer({antialias: true});
     //renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
     //renderer.setClearColor(0x404040, 1);

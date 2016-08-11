@@ -37,8 +37,18 @@ function createGlobe(radius, wSeg, hSeg)
     //Load and add the textures
     var loader = new THREE.TextureLoader();
     globeMesh.material.map = loader.load("./textures/2_no_clouds_8k.jpg");
+
+    // enable mipmaps and anisotropic filtering for better looking texturing
+    // note: mipmaps need power-of-2 texture size
+    globeMesh.material.map.anisotropy = renderer.getMaxAnisotropy();
+    globeMesh.material.map.magFilter = THREE.NearestFilter;
+    globeMesh.material.map.minFilter = THREE.LinearMipMapLinearFilter;
+    
+    // bump mapping
     globeMesh.material.bumpMap = loader.load("./textures/earthbump1k.jpg");
     globeMesh.material.bumpScale = 0.03;
+
+    // specular Phong reflection
     globeMesh.material.specularMap = loader.load("./textures/water_4k.png");
     globeMesh.material.specular = new THREE.Color("grey");
 
