@@ -18,8 +18,19 @@
 function createGlobe(radius, wSeg, hSeg)
 {
 
-    //Create the sphere and apply a diffused material
-    var geometry = new THREE.SphereGeometry(radius, wSeg, hSeg);
+    // Create the sphere
+    // The default for SphereGeometry is to start creating the mesh at -90 deg west (in geographic coordinates).
+    // The mesh is then grown in eastwards direction. We want the grid to start at -180 deg, such that a 
+    // standard texture in geographic coordinates from -180 to +180 degrees appears centered on the central
+    // meridian (defined by x = 0). The location at lon=0 and lat=0 is where the WebGL z-axis intersects the sphere.
+    // So move the starting point for construcint the sphere geometry by 90 degrees westwards. This will align 
+    // the UV coordinates with the texture in geographic coordinates. Hence phiStart equals -Math.PI / 2. 
+    // 
+    // The documentation seems to be wrong for SphereGeometry. It explains that the vertical sweep is around 
+    // the Z axis, however, this is the X axis.
+    var geometry = new THREE.SphereGeometry(radius, wSeg, hSeg, -Math.PI / 2, Math.PI * 2, 0, Math.PI);
+
+    // apply a diffused material
     var material = new THREE.MeshPhongMaterial();
     var globeMesh = new THREE.Mesh(geometry, material);
 
@@ -32,9 +43,6 @@ function createGlobe(radius, wSeg, hSeg)
     globeMesh.material.specular = new THREE.Color("grey");
 
     globeMesh.name = "globeMesh";
-
-    globeMesh.rotation.y = 135 * Math.PI /180;
-    //globeMesh.rotation.x = -25 * Math.PI /180;
 
     return globeMesh;
 
@@ -80,15 +88,15 @@ function createMapShape(lat1, long1, lat2, long2)
     latArray[7] = lat2;
     latArray[8] = lat2;
 
-    longArray[0] = long1 + 90;
-    longArray[1] = (0.5 * (long2 - long1) + long1) + 90;
-    longArray[2] = long2 + 90;
-    longArray[3] = long1 + 90;
-    longArray[4] = (0.5 * (long2 - long1) + long1) + 90;
-    longArray[5] = long2 + 90;
-    longArray[6] = long1 + 90;
-    longArray[7] = (0.5 * (long2 - long1) + long1) + 90;
-    longArray[8] = long2 + 90;
+    longArray[0] = long1;
+    longArray[1] = (0.5 * (long2 - long1) + long1);
+    longArray[2] = long2;
+    longArray[3] = long1;
+    longArray[4] = (0.5 * (long2 - long1) + long1);
+    longArray[5] = long2;
+    longArray[6] = long1;
+    longArray[7] = (0.5 * (long2 - long1) + long1);
+    longArray[8] = long2;
 
     //Create the new shape using the coords from the Lat/Long arrays
     var geometry = new THREE.Geometry();
@@ -96,7 +104,7 @@ function createMapShape(lat1, long1, lat2, long2)
     var vertexCoord;
 
     for (var i = 0; i < 9; i++){
-        vertexCoord = convertLatLong(latArray[i], longArray[i]);
+        vertexCoord = convertLatLongToWebGLXYZ(20.1, latArray[i], longArray[i]);
         geometry.vertices.push(new THREE.Vector3(vertexCoord.x, vertexCoord.y, vertexCoord.z));
     }
 
@@ -114,24 +122,35 @@ function createMapShape(lat1, long1, lat2, long2)
     mapShapeMesh.material.wireframe = false;
     mapShapeMesh.material.side = THREE.DoubleSide;
 
-
-
     return mapShapeMesh;
-
 
 }
 
-
-function convertLatLong(lat, long)
-{
-    var x = Math.sin(toRadians(long)) * Math.cos(toRadians(-lat)) * 20.1;
-    var y = Math.sin(toRadians(long)) * Math.sin(toRadians(-lat)) * 20.1;
-    var z = Math.cos(toRadians(long)) * 20.1;
+/**
+ * Convert geographic latitude and longitude to WebGL XYZ coordinate system. This 
+ * uses code from threejs SphereBufferGeometry.
+ */
+function convertLatLongToWebGLXYZ(radius, lat, lon) {
+    
+    // SphereBufferGeometry uses a polar (or zenithal angle). Latidude is an elevation angle. 
+    // So convert from polar angle to elevation angle. 
+    lat = 90 - lat;
+    
+    // SphereGeometry starts creating the mesh at longitude -90 degrees. 
+    // Add 90 degrees to bring the central meridian to where the WebGL z axis intersects the sphere. 
+    lon += 90;
+    
+    // transformation from spherical coordinates to Cartesian coordinates 
+    // copied from SphereBufferGeometry
+    // https://github.com/mrdoob/three.js/blob/master/src/extras/geometries/SphereBufferGeometry.js
+    var x = -radius * Math.cos(toRadians(lon)) * Math.sin(toRadians(lat));
+    var y = radius * Math.cos(toRadians(lat));
+    var z = radius * Math.sin(toRadians(lon)) * Math.sin(toRadians(lat));
 
     return {
-        x: x,
-        y: y,
-        z: z
+        x : x,
+        y : y,
+        z : z
     };
 }
 
