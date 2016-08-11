@@ -144,18 +144,18 @@ function convertLatLongToWebGLXYZ(radius, lat, lon) {
     
     // SphereBufferGeometry uses a polar (or zenithal angle). Latidude is an elevation angle. 
     // So convert from polar angle to elevation angle. 
-    lat = 90 - lat;
+    lat = toRadians(90 - lat);
     
     // SphereGeometry starts creating the mesh at longitude -90 degrees. 
     // Add 90 degrees to bring the central meridian to where the WebGL z axis intersects the sphere. 
-    lon += 90;
+    lon = toRadians(lon + 90);
     
     // transformation from spherical coordinates to Cartesian coordinates 
     // copied from SphereBufferGeometry
     // https://github.com/mrdoob/three.js/blob/master/src/extras/geometries/SphereBufferGeometry.js
-    var x = -radius * Math.cos(toRadians(lon)) * Math.sin(toRadians(lat));
-    var y = radius * Math.cos(toRadians(lat));
-    var z = radius * Math.sin(toRadians(lon)) * Math.sin(toRadians(lat));
+    var x = -radius * Math.cos(lon) * Math.sin(lat);
+    var y = radius * Math.cos(lat);
+    var z = radius * Math.sin(lon) * Math.sin(lat);
 
     return {
         x : x,
