@@ -18,7 +18,6 @@ var init = initScene();
 var scene = init.scene;
 var camera = init.camera;
 var renderer = init.renderer;
-var R = 20;
 
 //Initialise the raycaster
 var raycaster = new THREE.Raycaster();
@@ -29,12 +28,17 @@ var mouse = new THREE.Vector2(),
 
 //Trackball controls
 //var controls = new THREE.TrackballControls(camera);
-var controls = new THREE.OrthographicTrackballControls(camera);
-controls.rotateSpeed = 5.0;
-controls.minDistance = 40.0;
-controls.maxDistance = 150.0;
-
-//controls.addEventListener('change', render);
+/*var controls = new THREE.OrthographicTrackballControls(camera);
+ controls.addEventListener('change', function(e) {
+ console.log("event ", controls.object.rotation, controls.object.position);
+ console.log("camera", camera.rotation, camera.position);
+ }, false);
+ */
+controls = new THREE.OrbitControls(camera/*, renderer.domElement*/ );
+//controls.addEventListener( 'change', render ); // add this only if there is no animation loop (requestAnimationFrame)
+controls.minZoom = 0.5;
+controls.maxZoom = 10;
+controls.enablePan = false;
 animate();
 
 //Set the light source and position
@@ -45,7 +49,7 @@ light.position.set(50, 30, 50);
 //Set up the listeners (windows resize, mouse move and mouse click)
 window.addEventListener('resize', onWindowResize, false);
 document.addEventListener('mousemove', onDocumentMouseMove, false);
-document.addEventListener('mousedown', onDocumentMouseDown, false);
+document.addEventListener('click', onDocumentMouseClick, false);
 
 //Create the virtual globe
 var mapObjects = [];
@@ -71,15 +75,15 @@ function initScene() {
 	var container = document.createElement('div');
 	document.body.appendChild(container);
 	var scene = new THREE.Scene();
-	
+	// FIXME hard-coded radius
 	var r = 20;
-	//  FIXME should use size of container instead
+	//  FIXME should use size of container instead of window
 	var aspectRatio = window.innerWidth / window.innerHeight;
-	
+
 	// initial frustum for orthographic camera is size of the scene
 	// near and far planes are along camera viewing axis. Near plane should > 0, as objects behind camera are never visible.
 	var camera = new THREE.OrthographicCamera(-r * aspectRatio, r * aspectRatio, r, -r, 1, r * 5);
-	
+
 	// position along z axis does not change apparent size of scene
 	camera.position.z = r * 2;
 	camera.zoom = 1;
@@ -88,6 +92,8 @@ function initScene() {
 		antialias : true
 	});
 	//renderer.setPixelRatio(window.devicePixelRatio);
+
+	//  FIXME should use size of container instead of window
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	//renderer.setClearColor(0x404040, 1);
 	container.appendChild(renderer.domElement);
@@ -115,7 +121,8 @@ function animate() {
 //Update the scene when the browser window size is changed
 function onWindowResize() {
 	//  FIXME should use size of container instead
-	var r = 20; // FIXME
+	var r = 20;
+	// FIXME hard-coded radius
 	camera.aspect = window.innerWidth / window.innerHeight;
 	camera.left = -r * camera.aspect;
 	camera.right = r * camera.aspect;
@@ -154,7 +161,7 @@ function onDocumentMouseMove(event) {
 }
 
 //When a map shape is clicked by the mouse, open the 2D map view & hide the virtual globe
-function onDocumentMouseDown(event) {
+function onDocumentMouseClick(event) {
 	event.preventDefault();
 
 	mouse.x = (event.clientX / renderer.domElement.clientWidth ) * 2 - 1;
@@ -162,15 +169,12 @@ function onDocumentMouseDown(event) {
 
 	raycaster.setFromCamera(mouse, camera);
 
+	var mouseXYZ = convertScreenCoordinatesToWebGLXYZ(22, mouse.x, mouse.y);
 	var intersects = raycaster.intersectObjects(mapObjects);
 
 	if (intersects.length > 0) {
-
-		var mouseXYZ = convertScreenCoordinatesToWebGLXYZ(22, mouse.x, mouse.y);
-		console.log("clicked at ", mouseXYZ.x, mouseXYZ.y, mouseXYZ.z);
-
-		var topLeft = convertScreenCoordinatesToWebGLXYZ(22, -1, 1);
-		var bottomRight = convertScreenCoordinatesToWebGLXYZ(22, 1, -1);
+		var topLeft = convertScreenCoordinatesToWebGLXYZ(-1, 1);
+		var bottomRight = convertScreenCoordinatesToWebGLXYZ(1, -1);
 		var xMin = topLeft.x;
 		var xMax = bottomRight.x;
 		var yMin = bottomRight.y;
@@ -183,12 +187,6 @@ function onDocumentMouseDown(event) {
 		 controls.enabled = false;
 		 */
 
-		console.log("before");
-		for (var i = 0; i < 9; i++) {
-			var vertices = mapObjects[0].geometry.vertices;
-			console.log(vertices[i].x, vertices[i].y, vertices[i].z)
-		}
-
 		for (var i = 0; i < mapObjects.length; i++) {
 			//mapObjects[i].visible = false;
 
@@ -196,52 +194,48 @@ function onDocumentMouseDown(event) {
 
 			vertices[0].x = xMin;
 			vertices[0].y = yMax;
-			vertices[0].z = 0;
+			vertices[0].z = 20;
 
 			vertices[1].x = (xMin + xMax) * 0.5;
 			vertices[1].y = yMax;
-			vertices[1].z = 0;
+			vertices[1].z = 20;
 
 			vertices[2].x = xMax;
 			vertices[2].y = yMax;
-			vertices[2].z = 0;
+			vertices[2].z = 20;
 
 			vertices[3].x = xMin;
 			vertices[3].y = (yMin + yMax) * 0.5;
-			vertices[3].z = 0;
+			vertices[3].z = 20;
 
 			vertices[4].x = (xMin + xMax) * 0.5;
 			vertices[4].y = (yMin + yMax) * 0.5;
-			vertices[4].z = 0;
+			vertices[4].z = 20;
 
 			vertices[5].x = xMax;
 			vertices[5].y = (yMin + yMax) * 0.5;
-			vertices[5].z = 0;
+			vertices[5].z = 20;
 
 			vertices[6].x = xMin;
 			vertices[6].y = yMin;
-			vertices[6].z = 0;
+			vertices[6].z = 20;
 
 			vertices[7].x = (xMin + xMax) * 0.5;
 			vertices[7].y = yMin;
-			vertices[7].z = 0;
+			vertices[7].z = 20;
 
 			vertices[8].x = xMax;
 			vertices[8].y = yMin;
-			vertices[8].z = 0;
-		}
+			vertices[8].z = 20;
+		
+			mapObjects[i].geometry.verticesNeedUpdate = true;
 
-		console.log("after");
-		for (var i = 0; i < 9; i++) {
-			var vertices = mapObjects[0].geometry.vertices;
-			console.log(vertices[i].x, vertices[i].y, vertices[i].z)
 		}
-		mapObjects[0].geometry.verticesNeedUpdate = true;
 	}
 }
 
-function convertScreenCoordinatesToWebGLXYZ(radius, xScreen, yScreen) {
-	var vector = new THREE.Vector3(xScreen, yScreen, 0.5);
+function convertScreenCoordinatesToWebGLXYZ(xScreen, yScreen) {
+	var vector = new THREE.Vector3(xScreen, yScreen, 0);
 	vector.unproject(camera);
 	return vector;
 }

@@ -60,7 +60,7 @@ function createGlobe(radius, wSeg, hSeg)
 
 function addMapObjects()
 {
-    var mapSection = createMapShape(-30, 142, -40, 155);
+    var mapSection = createMapShape(49, 4, 44, 15);
     //var mapSection2 = createMapShape(3, 5, -30, -20);
 
     mapSection.url = "./atlasmaps/test-map.html";
