@@ -61,19 +61,19 @@ function createGlobe(radius, wSeg, hSeg)
 function addMapObjects()
 {
     var mapSection = createMapShape(49, 4, 44, 15);
-    //var mapSection2 = createMapShape(3, 5, -30, -20);
+    var mapSection2 = createMapShape(-30, 140, -38, 150);
 
     mapSection.url = "./atlasmaps/test-map.html";
-    //mapSection2.url = "./atlasmaps/test-map2.html";
+    mapSection2.url = "./atlasmaps/test-map2.html";
     //scene.add(mapSection);
     //scene.add(mapSection2);
 
 
-    console.log(mapSection);
 
     mapObjects.push(mapSection);
-    //mapObjects.push(mapSection2);
+    mapObjects.push(mapSection2);
     earthModel.add(mapSection);
+    earthModel.add(mapSection2);
 
 }
 

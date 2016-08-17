@@ -85,8 +85,10 @@ function initScene() {
 	var camera = new THREE.OrthographicCamera(-r * aspectRatio, r * aspectRatio, r, -r, 1, r * 5);
 
 	// position along z axis does not change apparent size of scene
+	//update: needed to add updateProjectMatrix to apply the zoom change.
 	camera.position.z = r * 2;
-	camera.zoom = 1;
+	camera.zoom = 0.75;
+	camera.updateProjectionMatrix();
 
 	var renderer = new THREE.WebGLRenderer({
 		antialias : true
@@ -169,28 +171,100 @@ function onDocumentMouseClick(event) {
 
 	raycaster.setFromCamera(mouse, camera);
 
-	var mouseXYZ = convertScreenCoordinatesToWebGLXYZ(22, mouse.x, mouse.y);
+	//var mouseXYZ = convertScreenCoordinatesToWebGLXYZ(22, mouse.x, mouse.y);
 	var intersects = raycaster.intersectObjects(mapObjects);
 
+	var popupGeometry = new THREE.Geometry();
+	var popupObject;
+	var xPer = [-0.8, 0, 0.8, -0.8, 0, 0.8, -0.8, 0, 0.8];
+	var yPer = [0.8, 0.8, 0.8, 0, 0, 0, -0.8, -0.8, -0.8];
+
+
 	if (intersects.length > 0) {
-		var topLeft = convertScreenCoordinatesToWebGLXYZ(-1, 1);
-		var bottomRight = convertScreenCoordinatesToWebGLXYZ(1, -1);
+
+	/*
+		var cameraPos = camera.position;
+		var newView = new THREE.Vector3();
+		var newView2 = new THREE.Vector3();
+		newView.copy(cameraPos);
+		newView2.copy(cameraPos);
+		camera.worldToLocal(newView);
+		camera.localToWorld(newView2);
+
+		console.log(camera.position);
+		console.log(newView);
+		console.log(newView2);
+*/
+
+		//console.log(convertScreenCoordinatesToWebGLXYZ(0.2, 0.2));
+
+		/*
+		for (var i = 0; i < 9; i++) {
+			var xScreen = window.innerWidth * xPer[i];
+			var yScreen = window.innerHeight * yPer[i];
+			popupObject = screenToWebGL(xScreen, yScreen );
+			console.log(popupObject);
+			popupGeometry.vertices.push(new THREE.Vector3(popupObject.x, popupObject.y, popupObject.z));
+		}
+
+		popupGeometry.faces.push(new THREE.Face3(0, 3, 1));
+		popupGeometry.faces.push(new THREE.Face3(3, 4, 1));
+		popupGeometry.faces.push(new THREE.Face3(1, 4, 2));
+		popupGeometry.faces.push(new THREE.Face3(4, 5, 2));
+		popupGeometry.faces.push(new THREE.Face3(3, 6, 4));
+		popupGeometry.faces.push(new THREE.Face3(6, 7, 4));
+		popupGeometry.faces.push(new THREE.Face3(4, 7, 5));
+		popupGeometry.faces.push(new THREE.Face3(7, 8, 5));
+
+		var popupMaterial = new THREE.MeshBasicMaterial({color: 0xff0000, transparent: true, opacity: 0.5});
+		var popupMesh = new THREE.Mesh(popupGeometry, popupMaterial);
+		popupMesh.material.side = THREE.DoubleSide;
+
+		scene.add(popupMesh);
+	//	console.log(popupMesh);
+	//	renderer.render(scene, camera);
+
+		*/
+
+
+		//var popupObject = getCoordinates(intersects[0].object, camera);
+
+		//console.log(window.innerWidth * 0.2);
+		//console.log(window.innerHeight * 0.2);
+		//console.log(convertScreenCoordinatesToWebGLXYZ(window.innerWidth * 0.2, window.innerHeight * 0.2));
+
+
+
+
+
+
+		//intersects[0].object.material.color.setHex(Math.random() * 0xffffff);
+		//showDialog(intersects[0].object.url);
+		//earthModel.visible = false;
+		//controls.enabled = false;
+
+
+
+		var topLeft = convertScreenCoordinatesToWebGLXYZ(-0.8, 0.8);
+		var bottomRight = convertScreenCoordinatesToWebGLXYZ(0.8, -0.8);
 		var xMin = topLeft.x;
 		var xMax = bottomRight.x;
 		var yMin = bottomRight.y;
 		var yMax = topLeft.y;
 
-		/*
-		 //intersects[0].object.material.color.setHex(Math.random() * 0xffffff);
-		 showDialog(intersects[0].object.url);
-		 earthModel.visible = false;
-		 controls.enabled = false;
-		 */
-
-		for (var i = 0; i < mapObjects.length; i++) {
+		//for (var i = 0; i < mapObjects.length; i++) {
 			//mapObjects[i].visible = false;
 
-			var vertices = mapObjects[i].geometry.vertices;
+			console.log(xMin);
+			console.log(yMin);
+			console.log(xMax);
+			console.log(yMax);
+
+
+		//intersects[0].object.lookAt(camera.position);
+		intersects[0].object.quaternion.copy(camera.quaternion);
+
+		var vertices = intersects[0].object.geometry.vertices;
 
 			vertices[0].x = xMin;
 			vertices[0].y = yMax;
@@ -228,17 +302,44 @@ function onDocumentMouseClick(event) {
 			vertices[8].y = yMin;
 			vertices[8].z = 20;
 		
-			mapObjects[i].geometry.verticesNeedUpdate = true;
+			intersects[0].object.geometry.verticesNeedUpdate = true;
 
-		}
+
+
+		//}
+
 	}
 }
 
 function convertScreenCoordinatesToWebGLXYZ(xScreen, yScreen) {
-	var vector = new THREE.Vector3(xScreen, yScreen, 0);
+	var vector = new THREE.Vector3(xScreen, yScreen, -1);
 	vector.unproject(camera);
+
 	return vector;
 }
+
+
+//Function to compute the 3D scene coordinates from the screen coordinates
+function screenToWebGL(xScreen, yScreen)
+{
+	var vector = new THREE.Vector3();
+
+	vector.set(xScreen, yScreen, -1 );
+	vector.unproject(camera);
+	//var targetZ = 40;
+	var dir = vector.sub(camera.position).normalize();
+	//var distance = (targetZ -camera.position.z) / dir.z;
+	var distance = -camera.position.z / dir.z;
+
+	return camera.position.clone().add(dir.multiplyScalar(distance));
+
+
+
+	//console.log(pos);
+
+}
+
+
 
 //Function to open a JQuery Dialog box which loads a HTML page
 //which contains the interactive 2D atlas map.
@@ -246,6 +347,13 @@ function convertScreenCoordinatesToWebGLXYZ(xScreen, yScreen) {
 function showDialog(mapURL) {
 	var page = mapURL;
 
+	//Set the height & width of the dialog window to 80% of the browser window size
+	var winWidth = $(window).width();
+	var pWidth = winWidth * 0.8;
+	var winHeight = $(window).height();
+	var pHeight = winHeight * 0.8;
+
+	//When the dialog window is closed, show the virtual globe and re-enable the controls
 	var closeFunction = function() {
 		earthModel.visible = true;
 		controls.enabled = true;
@@ -257,8 +365,8 @@ function showDialog(mapURL) {
 	var $dialog = $('<div></div>').html('<iframe style="border: 0px; " src="' + page + '" width="100%" height="100%"></iframe>').dialog({
 		autoOpen : false,
 		modal : true,
-		height : 800,
-		width : 1200,
+		height : pHeight,
+		width : pWidth,
 		title : "Atlas Map",
 		close : closeFunction
 	});
