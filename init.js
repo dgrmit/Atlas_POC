@@ -26,14 +26,6 @@ var raycaster = new THREE.Raycaster();
 var mouse = new THREE.Vector2(),
     INTERSECTED;
 
-//Trackball controls
-//var controls = new THREE.TrackballControls(camera);
-/*var controls = new THREE.OrthographicTrackballControls(camera);
- controls.addEventListener('change', function(e) {
- console.log("event ", controls.object.rotation, controls.object.position);
- console.log("camera", camera.rotation, camera.position);
- }, false);
- */
 controls = new THREE.OrbitControls(camera/*, renderer.domElement*/ );
 //controls.addEventListener( 'change', render ); // add this only if there is no animation loop (requestAnimationFrame)
 controls.minZoom = 0.5;
@@ -109,7 +101,6 @@ function initScene() {
 
 //Render function used by the Trackball controls
 function render() {
-
 	renderer.render(scene, camera);
 }
 
@@ -168,178 +159,75 @@ function onDocumentMouseClick(event) {
 
 	mouse.x = (event.clientX / renderer.domElement.clientWidth ) * 2 - 1;
 	mouse.y = -(event.clientY / renderer.domElement.clientHeight ) * 2 + 1;
-
 	raycaster.setFromCamera(mouse, camera);
-
-	//var mouseXYZ = convertScreenCoordinatesToWebGLXYZ(22, mouse.x, mouse.y);
 	var intersects = raycaster.intersectObjects(mapObjects);
 
-	var popupGeometry = new THREE.Geometry();
-	var popupObject;
-	var xPer = [-0.8, 0, 0.8, -0.8, 0, 0.8, -0.8, 0, 0.8];
-	var yPer = [0.8, 0.8, 0.8, 0, 0, 0, -0.8, -0.8, -0.8];
-
-
 	if (intersects.length > 0) {
-
-	/*
-		var cameraPos = camera.position;
-		var newView = new THREE.Vector3();
-		var newView2 = new THREE.Vector3();
-		newView.copy(cameraPos);
-		newView2.copy(cameraPos);
-		camera.worldToLocal(newView);
-		camera.localToWorld(newView2);
-
-		console.log(camera.position);
-		console.log(newView);
-		console.log(newView2);
-*/
-
-		//console.log(convertScreenCoordinatesToWebGLXYZ(0.2, 0.2));
-
-		/*
-		for (var i = 0; i < 9; i++) {
-			var xScreen = window.innerWidth * xPer[i];
-			var yScreen = window.innerHeight * yPer[i];
-			popupObject = screenToWebGL(xScreen, yScreen );
-			console.log(popupObject);
-			popupGeometry.vertices.push(new THREE.Vector3(popupObject.x, popupObject.y, popupObject.z));
-		}
-
-		popupGeometry.faces.push(new THREE.Face3(0, 3, 1));
-		popupGeometry.faces.push(new THREE.Face3(3, 4, 1));
-		popupGeometry.faces.push(new THREE.Face3(1, 4, 2));
-		popupGeometry.faces.push(new THREE.Face3(4, 5, 2));
-		popupGeometry.faces.push(new THREE.Face3(3, 6, 4));
-		popupGeometry.faces.push(new THREE.Face3(6, 7, 4));
-		popupGeometry.faces.push(new THREE.Face3(4, 7, 5));
-		popupGeometry.faces.push(new THREE.Face3(7, 8, 5));
-
-		var popupMaterial = new THREE.MeshBasicMaterial({color: 0xff0000, transparent: true, opacity: 0.5});
-		var popupMesh = new THREE.Mesh(popupGeometry, popupMaterial);
-		popupMesh.material.side = THREE.DoubleSide;
-
-		scene.add(popupMesh);
-	//	console.log(popupMesh);
-	//	renderer.render(scene, camera);
-
-		*/
-
-
-		//var popupObject = getCoordinates(intersects[0].object, camera);
-
-		//console.log(window.innerWidth * 0.2);
-		//console.log(window.innerHeight * 0.2);
-		//console.log(convertScreenCoordinatesToWebGLXYZ(window.innerWidth * 0.2, window.innerHeight * 0.2));
-
-
-
-
-
-
-		//intersects[0].object.material.color.setHex(Math.random() * 0xffffff);
-		//showDialog(intersects[0].object.url);
-		//earthModel.visible = false;
-		//controls.enabled = false;
-
-
-
-		var topLeft = convertScreenCoordinatesToWebGLXYZ(-0.8, 0.8);
-		var bottomRight = convertScreenCoordinatesToWebGLXYZ(0.8, -0.8);
-		var xMin = topLeft.x;
-		var xMax = bottomRight.x;
-		var yMin = bottomRight.y;
-		var yMax = topLeft.y;
-
-		//for (var i = 0; i < mapObjects.length; i++) {
-			//mapObjects[i].visible = false;
-
-			console.log(xMin);
-			console.log(yMin);
-			console.log(xMax);
-			console.log(yMax);
-
-
-		//intersects[0].object.lookAt(camera.position);
-		intersects[0].object.quaternion.copy(camera.quaternion);
-
-		var vertices = intersects[0].object.geometry.vertices;
-
-			vertices[0].x = xMin;
-			vertices[0].y = yMax;
-			vertices[0].z = 20;
-
-			vertices[1].x = (xMin + xMax) * 0.5;
-			vertices[1].y = yMax;
-			vertices[1].z = 20;
-
-			vertices[2].x = xMax;
-			vertices[2].y = yMax;
-			vertices[2].z = 20;
-
-			vertices[3].x = xMin;
-			vertices[3].y = (yMin + yMax) * 0.5;
-			vertices[3].z = 20;
-
-			vertices[4].x = (xMin + xMax) * 0.5;
-			vertices[4].y = (yMin + yMax) * 0.5;
-			vertices[4].z = 20;
-
-			vertices[5].x = xMax;
-			vertices[5].y = (yMin + yMax) * 0.5;
-			vertices[5].z = 20;
-
-			vertices[6].x = xMin;
-			vertices[6].y = yMin;
-			vertices[6].z = 20;
-
-			vertices[7].x = (xMin + xMax) * 0.5;
-			vertices[7].y = yMin;
-			vertices[7].z = 20;
-
-			vertices[8].x = xMax;
-			vertices[8].y = yMin;
-			vertices[8].z = 20;
+		// Compute the corners of a flat rectangle in world space that covers the entire view space.
+		// The rectangle is placed in front of the camera. The center of the rectangle is on the
+		// line connecting the camera position and the centre of the sphere. We use the camera direction
+		// vector (i.e. the vector pointing from the camera to the centre of the sphere) and the camera
+		// up vector (i.e. the vector pointing towards the upper border of the view space) to 
+		// compute the four corners of the rectangle. We use the cross product of these two vectors
+		// to compute a third vector pointing from the camera centre to the left border of the 
+		// view space. The four corners are then computed by adding these two vectors to the camera
+		// position.   
 		
-			intersects[0].object.geometry.verticesNeedUpdate = true;
+		// compute the camera direction in world space
+		// this vector is pointing from the camera position towards the centre of the sphere
+		var cameraDirection = new THREE.Vector3();
+		camera.getWorldDirection(cameraDirection);
 
+		// compute camera up vector in world space
+		// this direction vector points from the camera position towards the upper border of the image plane
+		// the length of up is 1.
+		var up = new THREE.Vector3();
+		var worldQuaternion = new THREE.Quaternion();
+		camera.getWorldQuaternion(worldQuaternion);
+		up.copy(camera.up).applyQuaternion(worldQuaternion);
+		
+		// vector from mesh centre to top of mesh
+		var top = new THREE.Vector3();
+		top.copy(up);
+		top.multiplyScalar(camera.top / camera.zoom);
 
+		// vector from mesh centre to bottom of mesh
+		var bottom = new THREE.Vector3();
+		bottom.copy(up);
+		bottom.multiplyScalar(camera.bottom / camera.zoom);
+		
+		// vector from mesh centre to left side of mesh
+		var left = new THREE.Vector3();
+		left.crossVectors(cameraDirection, up);
+		left.multiplyScalar(camera.left / camera.zoom);
 
-		//}
+		// vector from mesh centre to right side of mesh
+		var right = new THREE.Vector3();
+		right.crossVectors(cameraDirection, up);
+		right.multiplyScalar(camera.right / camera.zoom);
 
+		// central position of mesh
+		var meshCenter = new THREE.Vector3();
+		meshCenter.copy(cameraDirection);
+		// camera direction is pointing towards centre of sphere
+		// use negative sign for distance multiplication to invert camera direction
+		// FIXME hard-coded radius plus offset
+		meshCenter.multiplyScalar(-(20 + 1));
+		
+		// new vertex coordinates are relative to centre of mesh
+		var vertices = intersects[0].object.geometry.vertices;
+		vertices[0].copy(meshCenter).add(top).add(left);
+		vertices[1].copy(meshCenter).add(top);
+		vertices[2].copy(meshCenter).add(top).add(right);
+		vertices[3].copy(meshCenter).add(left);
+		vertices[4].copy(meshCenter);
+		vertices[5].copy(meshCenter).add(right);
+		vertices[6].copy(meshCenter).add(bottom).add(left);
+		vertices[7].copy(meshCenter).add(bottom);
+		vertices[8].copy(meshCenter).add(bottom).add(right);
+		intersects[0].object.geometry.verticesNeedUpdate = true;
 	}
 }
-
-function convertScreenCoordinatesToWebGLXYZ(xScreen, yScreen) {
-	var vector = new THREE.Vector3(xScreen, yScreen, -1);
-	vector.unproject(camera);
-
-	return vector;
-}
-
-
-//Function to compute the 3D scene coordinates from the screen coordinates
-function screenToWebGL(xScreen, yScreen)
-{
-	var vector = new THREE.Vector3();
-
-	vector.set(xScreen, yScreen, -1 );
-	vector.unproject(camera);
-	//var targetZ = 40;
-	var dir = vector.sub(camera.position).normalize();
-	//var distance = (targetZ -camera.position.z) / dir.z;
-	var distance = -camera.position.z / dir.z;
-
-	return camera.position.clone().add(dir.multiplyScalar(distance));
-
-
-
-	//console.log(pos);
-
-}
-
-
 
 //Function to open a JQuery Dialog box which loads a HTML page
 //which contains the interactive 2D atlas map.
