@@ -1,8 +1,8 @@
 /*************************************************************************************************
- Filename: init.js
+ Filename: virtualglobe.js
  Author: Daniel Guglielmi (#3423059)
 
- Description: Main JS file which initialises the scene, camera, renderer and trackball controls.
+ Description:
 
  All Project Files & Short Description
 
@@ -58,23 +58,40 @@ function createGlobe(radius, wSeg, hSeg)
 
 }
 
-function addMapObjects()
+//Function to convert degrees to radians
+function toRadians (angle)
 {
-    var mapSection = createMapShape(49, 4, 44, 15);
-    var mapSection2 = createMapShape(-30, 140, -38, 150);
-
-    mapSection.url = "./atlasmaps/test-map.html";
-    mapSection2.url = "./atlasmaps/test-map2.html";
-    //scene.add(mapSection);
-    //scene.add(mapSection2);
+    return angle * (Math.PI / 180);
+}
 
 
 
-    mapObjects.push(mapSection);
-    mapObjects.push(mapSection2);
-    earthModel.add(mapSection);
-    earthModel.add(mapSection2);
+/**
+ * Convert geographic latitude and longitude to WebGL XYZ coordinate system. This 
+ * uses code from threejs SphereBufferGeometry.
+ */
+function convertLatLongToWebGLXYZ(radius, lat, lon) {
+    
+    // SphereBufferGeometry uses a polar (or zenithal angle). Latidude is an elevation angle. 
+    // So convert from polar angle to elevation angle. 
+    lat = toRadians(90 - lat);
+    
+    // SphereGeometry starts creating the mesh at longitude -90 degrees. 
+    // Add 90 degrees to bring the central meridian to where the WebGL z axis intersects the sphere. 
+    lon = toRadians(lon + 90);
+    
+    // transformation from spherical coordinates to Cartesian coordinates 
+    // copied from SphereBufferGeometry
+    // https://github.com/mrdoob/three.js/blob/master/src/extras/geometries/SphereBufferGeometry.js
+    var x = -radius * Math.cos(lon) * Math.sin(lat);
+    var y = radius * Math.cos(lat);
+    var z = radius * Math.sin(lon) * Math.sin(lat);
 
+    return {
+        x : x,
+        y : y,
+        z : z
+    };
 }
 
 
@@ -114,7 +131,7 @@ function createMapShape(lat1, long1, lat2, long2)
     var vertexCoord;
 
     for (var i = 0; i < 9; i++){
-        vertexCoord = convertLatLongToWebGLXYZ(20.1, latArray[i], longArray[i]);
+        vertexCoord = convertLatLongToWebGLXYZ(20.5, latArray[i], longArray[i]);
         geometry.vertices.push(new THREE.Vector3(vertexCoord.x, vertexCoord.y, vertexCoord.z));
     }
 
@@ -136,35 +153,35 @@ function createMapShape(lat1, long1, lat2, long2)
 
 }
 
-/**
- * Convert geographic latitude and longitude to WebGL XYZ coordinate system. This 
- * uses code from threejs SphereBufferGeometry.
- */
-function convertLatLongToWebGLXYZ(radius, lat, lon) {
-    
-    // SphereBufferGeometry uses a polar (or zenithal angle). Latidude is an elevation angle. 
-    // So convert from polar angle to elevation angle. 
-    lat = toRadians(90 - lat);
-    
-    // SphereGeometry starts creating the mesh at longitude -90 degrees. 
-    // Add 90 degrees to bring the central meridian to where the WebGL z axis intersects the sphere. 
-    lon = toRadians(lon + 90);
-    
-    // transformation from spherical coordinates to Cartesian coordinates 
-    // copied from SphereBufferGeometry
-    // https://github.com/mrdoob/three.js/blob/master/src/extras/geometries/SphereBufferGeometry.js
-    var x = -radius * Math.cos(lon) * Math.sin(lat);
-    var y = radius * Math.cos(lat);
-    var z = radius * Math.sin(lon) * Math.sin(lat);
 
-    return {
-        x : x,
-        y : y,
-        z : z
-    };
+
+//Function to create the map shapes on the virtual globe
+function addMapObjects()
+{
+    //var mapSection = createMapShape(49, 4, 44, 15);
+    var mapSection = createMapShape(60, -10, 40, 20);
+    var mapSection2 = createMapShape(-20, 120, -40, 150);
+
+    mapSection.url = "./atlasmaps/test-map.html";
+    mapSection2.url = "./atlasmaps/test-map2.html";
+    //scene.add(mapSection);
+    //scene.add(mapSection2);
+
+
+
+    mapObjects.push(mapSection);
+    mapObjects.push(mapSection2);
+    earthModel.add(mapSection);
+    earthModel.add(mapSection2);
+
 }
 
-/*
+
+
+
+
+
+/*********************************************************************************************
 //Alternate method to create custom shape on the virtual globe
 //Uses the 2D map extents and translates Lat/Long to XYZ coords
 function createMapShape(lat1, long1, lat2, long2)
@@ -253,8 +270,3 @@ function createMapShape(shapeWd, shapeHt, shapeRotX, shapeRotY)
 }
     */
 
-
-function toRadians (angle)
-{
-    return angle * (Math.PI / 180);
-}

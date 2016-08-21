@@ -99,12 +99,12 @@ function initScene() {
 	};
 }
 
-//Render function used by the Trackball controls
+//Render function used by the Orbit controls
 function render() {
 	renderer.render(scene, camera);
 }
 
-//Animate function used by the Trackball controls
+//Animate function used by the Orbit controls
 function animate() {
 	controls.update();
 	requestAnimationFrame(animate);
@@ -157,111 +157,42 @@ function onDocumentMouseMove(event) {
 function onDocumentMouseClick(event) {
 	event.preventDefault();
 
+
 	mouse.x = (event.clientX / renderer.domElement.clientWidth ) * 2 - 1;
 	mouse.y = -(event.clientY / renderer.domElement.clientHeight ) * 2 + 1;
 	raycaster.setFromCamera(mouse, camera);
 	var intersects = raycaster.intersectObjects(mapObjects);
 
+	//Runs the following statements when a map shape has been clicked
 	if (intersects.length > 0) {
-		// Compute the corners of a flat rectangle in world space that covers the entire view space.
-		// The rectangle is placed in front of the camera. The center of the rectangle is on the
-		// line connecting the camera position and the centre of the sphere. We use the camera direction
-		// vector (i.e. the vector pointing from the camera to the centre of the sphere) and the camera
-		// up vector (i.e. the vector pointing towards the upper border of the view space) to 
-		// compute the four corners of the rectangle. We use the cross product of these two vectors
-		// to compute a third vector pointing from the camera centre to the left border of the 
-		// view space. The four corners are then computed by adding these two vectors to the camera
-		// position.   
-		
-		// compute the camera direction in world space
-		// this vector is pointing from the camera position towards the centre of the sphere
-		var cameraDirection = new THREE.Vector3();
-		camera.getWorldDirection(cameraDirection);
 
-		// compute camera up vector in world space
-		// this direction vector points from the camera position towards the upper border of the image plane
-		// the length of up is 1.
-		var up = new THREE.Vector3();
-		var worldQuaternion = new THREE.Quaternion();
-		camera.getWorldQuaternion(worldQuaternion);
-		up.copy(camera.up).applyQuaternion(worldQuaternion);
-		
-		// vector from mesh centre to top of mesh
-		var top = new THREE.Vector3();
-		top.copy(up);
-		top.multiplyScalar(camera.top / camera.zoom);
+		//Set the elapsed time variable to 0 (reset timer after any previous transitions)
+		t = 0;
 
-		// vector from mesh centre to bottom of mesh
-		var bottom = new THREE.Vector3();
-		bottom.copy(up);
-		bottom.multiplyScalar(camera.bottom / camera.zoom);
-		
-		// vector from mesh centre to left side of mesh
-		var left = new THREE.Vector3();
-		left.crossVectors(cameraDirection, up);
-		left.multiplyScalar(camera.left / camera.zoom);
+		//Start the clock, which is used to track elapsed time used in the animation
+		clock.start();
 
-		// vector from mesh centre to right side of mesh
-		var right = new THREE.Vector3();
-		right.crossVectors(cameraDirection, up);
-		right.multiplyScalar(camera.right / camera.zoom);
+		//Disable the orbit controls, resets the dialog box flag and disables the ThreeJS mouse listeners
+		controls.enabled = false;
+		dialogClose = false;
+		document.removeEventListener('mousemove', onDocumentMouseMove, false);
+		document.removeEventListener('click', onDocumentMouseClick, false);
 
-		// central position of mesh
-		var meshCenter = new THREE.Vector3();
-		meshCenter.copy(cameraDirection);
-		// camera direction is pointing towards centre of sphere
-		// use negative sign for distance multiplication to invert camera direction
-		// FIXME hard-coded radius plus offset
-		meshCenter.multiplyScalar(-(20 + 1));
-		
-		// new vertex coordinates are relative to centre of mesh
-		var vertices = intersects[0].object.geometry.vertices;
-		vertices[0].copy(meshCenter).add(top).add(left);
-		vertices[1].copy(meshCenter).add(top);
-		vertices[2].copy(meshCenter).add(top).add(right);
-		vertices[3].copy(meshCenter).add(left);
-		vertices[4].copy(meshCenter);
-		vertices[5].copy(meshCenter).add(right);
-		vertices[6].copy(meshCenter).add(bottom).add(left);
-		vertices[7].copy(meshCenter).add(bottom);
-		vertices[8].copy(meshCenter).add(bottom).add(right);
-		intersects[0].object.geometry.verticesNeedUpdate = true;
+		//Creates additional copies of the map shape which are used as the transitional and final 2D map shapes
+		var transMapShape = new THREE.Mesh(intersects[0].object.geometry.clone(), intersects[0].object.material.clone());
+		var tempMapShape = new THREE.Mesh(intersects[0].object.geometry.clone(), intersects[0].object.material.clone());
+		var flatMapShape = calcFlatMapShape(tempMapShape);
+
+		//add the transitional map shape to the scene so that the animation function displays the shape
+		scene.add(transMapShape);
+
+		//call the transform (animation) function and passes the map shape, transitional map and 2D map objects
+		//as the arguments
+		mapshapeTransform(intersects[0].object, transMapShape, flatMapShape);
+
 	}
 }
 
-//Function to open a JQuery Dialog box which loads a HTML page
-//which contains the interactive 2D atlas map.
-//Function will also show the 3D elements once the 2D window is closed
-function showDialog(mapURL) {
-	var page = mapURL;
-
-	//Set the height & width of the dialog window to 80% of the browser window size
-	var winWidth = $(window).width();
-	var pWidth = winWidth * 0.8;
-	var winHeight = $(window).height();
-	var pHeight = winHeight * 0.8;
-
-	//When the dialog window is closed, show the virtual globe and re-enable the controls
-	var closeFunction = function() {
-		earthModel.visible = true;
-		controls.enabled = true;
-		for (var i = 0; i < mapObjects.length; i++) {
-			mapObjects[i].visible = true;
-		}
-	};
-
-	var $dialog = $('<div></div>').html('<iframe style="border: 0px; " src="' + page + '" width="100%" height="100%"></iframe>').dialog({
-		autoOpen : false,
-		modal : true,
-		height : pHeight,
-		width : pWidth,
-		title : "Atlas Map",
-		close : closeFunction
-	});
-
-	$dialog.dialog('open');
-
-}
 
 //Function to create and action the HTML buttons at the top of document
 function initControls() {
