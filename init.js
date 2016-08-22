@@ -74,11 +74,11 @@ function initScene() {
 
 	// initial frustum for orthographic camera is size of the scene
 	// near and far planes are along camera viewing axis. Near plane should > 0, as objects behind camera are never visible.
-	var camera = new THREE.OrthographicCamera(-r * aspectRatio, r * aspectRatio, r, -r, 1, r * 5);
+	var camera = new THREE.OrthographicCamera(-r * aspectRatio, r * aspectRatio, r, -r, 1, 100);
 
 	// position along z axis does not change apparent size of scene
 	//update: needed to add updateProjectMatrix to apply the zoom change.
-	camera.position.z = r * 2;
+	camera.position.z = 101;
 	camera.zoom = 0.75;
 	camera.updateProjectionMatrix();
 

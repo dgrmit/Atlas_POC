@@ -125,6 +125,20 @@ function mapshapeTransform(mapShape, transMapShape, flatMapShape)
         }
         //While not at the end of the array, each vertex is updated with the interpolated value
         else {
+
+            // project point onto sphere by scaling direction vector
+            var v = new THREE.Vector3(newX, newY, newZ);
+            // FIXME hard-coded radius
+            if (v.length() < 20) {
+                var directionVector = new THREE.Vector3(newX, newY, newZ);
+                directionVector.normalize();
+                // FIXME hard-coded radius plus tolerance
+                directionVector.multiplyScalar(22);
+                newX = directionVector.x;
+                newY = directionVector.y;
+                newZ = directionVector.z;
+            }
+
             transitionMapShape.geometry.vertices[i].x = newX;
             transitionMapShape.geometry.vertices[i].y = newY;
             transitionMapShape.geometry.vertices[i].z = newZ;
@@ -193,8 +207,8 @@ function calcFlatMapShape(clickedMapShape)
     meshCenter.copy(cameraDirection);
     // camera direction is pointing towards centre of sphere
     // use negative sign for distance multiplication to invert camera direction
-    // FIXME hard-coded radius plus offset
-    meshCenter.multiplyScalar(-(20 + 1));
+    // FIXME hard-coded position
+    meshCenter.multiplyScalar(-50);
 
     // new vertex coordinates are relative to centre of mesh
     var vertices = clickedMapShape.geometry.vertices;
