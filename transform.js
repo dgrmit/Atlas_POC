@@ -78,10 +78,10 @@ function mapshapeTransform(mapShape, transMapShape, flatMapShape)
     mapShape.visible = false;
     flatMapShape.visible = false;
 
-    console.log(initialMapShape.geometry.vertices[0]);
-    console.log(transMapShape.geometry.vertices[0]);
-    console.log(endMapShape.geometry.vertices[0]);
-    console.log("-------");
+    // console.log(initialMapShape.geometry.vertices[0]);
+    // console.log(transMapShape.geometry.vertices[0]);
+    // console.log(endMapShape.geometry.vertices[0]);
+    // console.log("-------");
 
 
     //Increment the value of t by the time delta variable to advance the animation

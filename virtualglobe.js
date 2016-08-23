@@ -144,8 +144,33 @@ function createMapShape(lat1, long1, lat2, long2)
     geometry.faces.push(new THREE.Face3(4, 7, 5));
     geometry.faces.push(new THREE.Face3(7, 8, 5));
 
+    //Define the UV coordinates of the texture
+    var UVs = [
+        new THREE.Vector2(0, 1),
+        new THREE.Vector2(0.5, 1),
+        new THREE.Vector2(1, 1),
+        new THREE.Vector2(0, 0.5),
+        new THREE.Vector2(0.5, 0.5),
+        new THREE.Vector2(1, 0.5),
+        new THREE.Vector2(0, 0),
+        new THREE.Vector2(0.5, 0),
+        new THREE.Vector2(1, 0)
+        ];
+
+    //UV coordinates for the texture mapping
+    geometry.faceVertexUvs[0].push([UVs[0], UVs[3], UVs[1]]);
+    geometry.faceVertexUvs[0].push([UVs[3], UVs[4], UVs[1]]);
+    geometry.faceVertexUvs[0].push([UVs[1], UVs[4], UVs[2]]);
+    geometry.faceVertexUvs[0].push([UVs[4], UVs[5], UVs[2]]);
+    geometry.faceVertexUvs[0].push([UVs[3], UVs[6], UVs[4]]);
+    geometry.faceVertexUvs[0].push([UVs[6], UVs[7], UVs[4]]);
+    geometry.faceVertexUvs[0].push([UVs[4], UVs[7], UVs[5]]);
+    geometry.faceVertexUvs[0].push([UVs[7], UVs[8], UVs[5]]);
+
+
     var material = new THREE.MeshBasicMaterial({color: Math.random() * 0xffffff, transparent: true, opacity: 0.5 });
     var mapShapeMesh = new THREE.Mesh(geometry, material);
+
     mapShapeMesh.material.wireframe = false;
     mapShapeMesh.material.side = THREE.DoubleSide;
 
@@ -163,11 +188,15 @@ function addMapObjects()
     var mapSection2 = createMapShape(-20, 120, -40, 150);
 
     mapSection.url = "./atlasmaps/test-map.html";
+    mapSection.texture = "./atlasmaps/mapsection.jpg";
     mapSection2.url = "./atlasmaps/test-map2.html";
+    mapSection2.texture = "./atlasmaps/mapsection2.jpg";
     //scene.add(mapSection);
     //scene.add(mapSection2);
 
-
+    // mapSection.material.map = new THREE.TextureLoader().load(mapSection.texture);
+    // mapSection.material.transparent = false;
+    // mapSection.material.color.setHex(0xffffff);
 
     mapObjects.push(mapSection);
     mapObjects.push(mapSection2);

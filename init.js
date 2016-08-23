@@ -186,8 +186,12 @@ function onDocumentMouseClick(event) {
 		//add the transitional map shape to the scene so that the animation function displays the shape
 		scene.add(transMapShape);
 
+		//Set the transitional map shape color to white with no transparency
 		//call the transform (animation) function and passes the map shape, transitional map and 2D map objects
 		//as the arguments
+		transMapShape.material.transparent = false;
+		transMapShape.material.color.setHex(0xffffff);
+		transMapShape.material.map = new THREE.TextureLoader().load(intersects[0].object.texture);
 		mapshapeTransform(intersects[0].object, transMapShape, flatMapShape);
 
 	}
