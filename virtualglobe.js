@@ -13,6 +13,7 @@
  three.js - Three.js library
  trackballcontrols.js - Trackball control library file
  *************************************************************************************************/
+"use strict";
 
 //Function to create the sphere and load the textures
 function createGlobe(radius, wSeg, hSeg)

@@ -13,6 +13,7 @@
  three.js - Three.js library
  trackballcontrols.js - Trackball control library file
  *************************************************************************************************/
+"use strict";
 
 //Global variables
 //Set up the Three.js clock

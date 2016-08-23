@@ -12,6 +12,7 @@
  three.js - Three.js library
  trackballcontrols.js - Trackball control library file
  *************************************************************************************************/
+"use strict";
 
 //Function call to initialise the scene, camera and renderer
 var init = initScene();
@@ -64,13 +65,15 @@ renderer.render(scene, camera);
 /*************************************************************/
 //Function to initialise the scene, camera & scene renderer
 function initScene() {
+
     var container = document.createElement("div");
-    document.body.appendChild(container);
-    scene = new THREE.Scene();
     // FIXME hard-coded radius
     var r = 20;
     //  FIXME should use size of container instead of window
     var aspectRatio = window.innerWidth / window.innerHeight;
+
+    document.body.appendChild(container);
+    scene = new THREE.Scene();
 
     // initial frustum for orthographic camera is size of the scene
     // near and far planes are along camera viewing axis. Near plane should > 0, as objects behind camera are never visible.
@@ -223,4 +226,5 @@ function initControls() {
     buttonControls.innerHTML = "<button onclick='controls.reset()'>Reset Camera</button>";
 
 }
+
 
