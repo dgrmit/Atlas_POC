@@ -109,6 +109,7 @@ function animate() {
 	controls.update();
 	requestAnimationFrame(animate);
 	render();
+	TWEEN.update();
 }
 
 //Update the scene when the browser window size is changed
@@ -157,7 +158,6 @@ function onDocumentMouseMove(event) {
 function onDocumentMouseClick(event) {
 	event.preventDefault();
 
-
 	mouse.x = (event.clientX / renderer.domElement.clientWidth ) * 2 - 1;
 	mouse.y = -(event.clientY / renderer.domElement.clientHeight ) * 2 + 1;
 	raycaster.setFromCamera(mouse, camera);
@@ -190,13 +190,12 @@ function onDocumentMouseClick(event) {
 		//call the transform (animation) function and passes the map shape, transitional map and 2D map objects
 		//as the arguments
 		transMapShape.material.transparent = false;
-		transMapShape.material.color.setHex(0xffffff);
 		transMapShape.material.map = new THREE.TextureLoader().load(intersects[0].object.texture);
 		mapshapeTransform(intersects[0].object, transMapShape, flatMapShape);
 
+		animateGlobe(-1, 0.5, 0.7);
 	}
 }
-
 
 //Function to create and action the HTML buttons at the top of document
 function initControls() {
