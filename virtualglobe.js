@@ -20,13 +20,13 @@ function createGlobe(radius, wSeg, hSeg)
 
     // Create the sphere
     // The default for SphereGeometry is to start creating the mesh at -90 deg west (in geographic coordinates).
-    // The mesh is then grown in eastwards direction. We want the grid to start at -180 deg, such that a 
+    // The mesh is then grown in eastwards direction. We want the grid to start at -180 deg, such that a
     // standard texture in geographic coordinates from -180 to +180 degrees appears centered on the central
     // meridian (defined by x = 0). The location at lon=0 and lat=0 is where the WebGL z-axis intersects the sphere.
-    // So move the starting point for construcint the sphere geometry by 90 degrees westwards. This will align 
-    // the UV coordinates with the texture in geographic coordinates. Hence phiStart equals -Math.PI / 2. 
-    // 
-    // The documentation seems to be wrong for SphereGeometry. It explains that the vertical sweep is around 
+    // So move the starting point for construcint the sphere geometry by 90 degrees westwards. This will align
+    // the UV coordinates with the texture in geographic coordinates. Hence phiStart equals -Math.PI / 2.
+    //
+    // The documentation seems to be wrong for SphereGeometry. It explains that the vertical sweep is around
     // the Z axis, however, this is the X axis.
     var geometry = new THREE.SphereGeometry(radius, wSeg, hSeg, -Math.PI / 2, Math.PI * 2, 0, Math.PI);
 
@@ -43,7 +43,7 @@ function createGlobe(radius, wSeg, hSeg)
     globeMesh.material.map.anisotropy = renderer.getMaxAnisotropy();
     globeMesh.material.map.magFilter = THREE.NearestFilter;
     globeMesh.material.map.minFilter = THREE.LinearMipMapLinearFilter;
-    
+
     // bump mapping
     globeMesh.material.bumpMap = loader.load("./textures/earthbump1k.jpg");
     globeMesh.material.bumpScale = 0.03;
@@ -67,20 +67,20 @@ function toRadians (angle)
 
 
 /**
- * Convert geographic latitude and longitude to WebGL XYZ coordinate system. This 
+ * Convert geographic latitude and longitude to WebGL XYZ coordinate system. This
  * uses code from threejs SphereBufferGeometry.
  */
 function convertLatLongToWebGLXYZ(radius, lat, lon) {
-    
-    // SphereBufferGeometry uses a polar (or zenithal angle). Latidude is an elevation angle. 
-    // So convert from polar angle to elevation angle. 
+
+    // SphereBufferGeometry uses a polar (or zenithal angle). Latidude is an elevation angle.
+    // So convert from polar angle to elevation angle.
     lat = toRadians(90 - lat);
-    
-    // SphereGeometry starts creating the mesh at longitude -90 degrees. 
-    // Add 90 degrees to bring the central meridian to where the WebGL z axis intersects the sphere. 
+
+    // SphereGeometry starts creating the mesh at longitude -90 degrees.
+    // Add 90 degrees to bring the central meridian to where the WebGL z axis intersects the sphere.
     lon = toRadians(lon + 90);
-    
-    // transformation from spherical coordinates to Cartesian coordinates 
+
+    // transformation from spherical coordinates to Cartesian coordinates
     // copied from SphereBufferGeometry
     // https://github.com/mrdoob/three.js/blob/master/src/extras/geometries/SphereBufferGeometry.js
     var x = -radius * Math.cos(lon) * Math.sin(lat);

@@ -27,7 +27,7 @@ var dialogClose = false;
 //Function to calculate the linear interpolation based on the values passed to it
 function lerp(k1, v1, k2, v2, k)
 {
-    return v = (k - k1)/(k2 - k1) * (v2 - v1) + v1;
+    return (k - k1)/(k2 - k1) * (v2 - v1) + v1;
 
 }
 
@@ -116,8 +116,8 @@ function mapshapeTransform(mapShape, transMapShape, flatMapShape)
                 //Shows the map shape on the virtual globe, re-enables the mouse listener.
                 //controls and removes the transitional map from the scene
                 flatMapShape.visible = true;
-                document.addEventListener('mousemove', onDocumentMouseMove, false);
-                document.addEventListener('click', onDocumentMouseClick, false);
+                document.addEventListener("mousemove", onDocumentMouseMove, false);
+                document.addEventListener("click", onDocumentMouseClick, false);
                 controls.enabled = true;
                 scene.remove(transMapShape);
                 return;
@@ -249,7 +249,7 @@ function showDialog(mapURL, initMap, transMap, endMap) {
     };
 
     //Specifies the dialog box parameters
-    var $dialog = $('<div></div>').html('<iframe style="border: 0px; " src="' + page + '" width="100%" height="100%"></iframe>').dialog({
+    var $dialog = $('<div></div>').html('<iframe style="border: 0; " src="' + page + '" width="100%" height="100%"></iframe>').dialog({
         autoOpen : false,
         modal : true,
         height : pHeight,
