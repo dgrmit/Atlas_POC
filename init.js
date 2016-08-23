@@ -106,9 +106,10 @@ function render() {
 
 //Animate function used by the Orbit controls
 function animate() {
-    controls.update();
-    requestAnimationFrame(animate);
-    render();
+	controls.update();
+	requestAnimationFrame(animate);
+	render();
+	TWEEN.update();
 }
 
 //Update the scene when the browser window size is changed
@@ -196,7 +197,8 @@ function onDocumentMouseClick(event) {
         transMapShape.material.map = new THREE.TextureLoader().load(clickedObject[0].object.texture);
         mapshapeTransform(clickedObject[0].object, transMapShape, flatMapShape);
 
-    }
+		animateGlobe(-1, 0.5, 0.7);
+	}
 }
 
 

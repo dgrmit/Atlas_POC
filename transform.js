@@ -224,6 +224,52 @@ function calcFlatMapShape(clickedMapShape)
 
     return clickedMapShape;
 
+// Convert from view space [-1,+1] to world space. Returned 3D coordinates are on a plane
+// passing through the origin of the world space.
+function viewSpaceToWorldSpace(viewX, viewY) {
+
+	// compute the camera direction in world space
+	// this vector is pointing from the camera position towards the centre of the sphere
+	var cameraDirection = new THREE.Vector3();
+	camera.getWorldDirection(cameraDirection);
+
+	// compute camera up vector in world space
+	// this direction vector points from the camera position towards the upper border of the image plane
+	// the length of up is 1.
+	var up = new THREE.Vector3();
+	var worldQuaternion = new THREE.Quaternion();
+	camera.getWorldQuaternion(worldQuaternion);
+	up.copy(camera.up).applyQuaternion(worldQuaternion);
+
+	// vector from origin to top in view space
+	var top = new THREE.Vector3();
+	top.copy(up);
+	top.multiplyScalar((camera.top) / camera.zoom * viewY);
+
+	// vector from origin to right side in view space
+	var right = new THREE.Vector3();
+	right.crossVectors(cameraDirection, up);
+	right.multiplyScalar((camera.right) / camera.zoom * viewX);
+
+	return top.add(right);
+}
+
+// Animated move and scale of the globe
+function animateGlobe(viewX, viewY, scale) {
+	var duration = 1000;
+	var worldXY = viewSpaceToWorldSpace(viewX, viewY);
+
+	var positionTween = new TWEEN.Tween(earthModel.position).to({
+		x : worldXY.x,
+		y : worldXY.y,
+		z : worldXY.z
+	}, duration).easing(TWEEN.Easing.Quartic.InOut).start();
+
+	var scaleTween = new TWEEN.Tween(earthModel.scale).to({
+		x : scale,
+		y : scale,
+		z : scale
+	}, duration).start();
 }
 
 //Function to open a JQuery Dialog box which loads a HTML page
@@ -238,15 +284,16 @@ function showDialog(mapURL, initMap, transMap, endMap) {
     var winHeight = $(window).height();
     var pHeight = winHeight * 0.8;
 
-    //When the dialog window is closed, set the flag to indicate the map shape transform function call
-    //came from here, reset the time variable, start the clock and call the map shape transform function
-    //with the initial and end map coordinates reversed (so the animation goes the opposite direction)
-    var closeFunction = function() {
-        dialogClose = true;
-        t = 0;
-        clock.start();
-        mapshapeTransform(endMap, transMap, initMap);
-    };
+	//When the dialog window is closed, set the flag to indicate the map shape transform function call
+	//came from here, reset the time variable, start the clock and call the map shape transform function
+	//with the initial and end map coordinates reversed (so the animation goes the opposite direction)
+	var closeFunction = function() {
+		dialogClose = true;
+		t = 0;
+		clock.start();
+		mapshapeTransform(endMap, transMap, initMap);
+		animateGlobe(0, 0, 1);
+	};
 
     //Specifies the dialog box parameters
     var $dialog = $('<div></div>').html('<iframe style="border: 0; " src="' + page + '" width="100%" height="100%"></iframe>').dialog({
