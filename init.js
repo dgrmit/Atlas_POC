@@ -26,7 +26,7 @@ var raycaster = new THREE.Raycaster();
 var mouse = new THREE.Vector2();
 var mouseOver;
 
-controls = new THREE.OrbitControls(camera/*, renderer.domElement*/);
+var controls = new THREE.OrbitControls(camera/*, renderer.domElement*/);
 //controls.addEventListener( 'change', render ); // add this only if there is no animation loop (requestAnimationFrame)
 controls.minZoom = 0.5;
 controls.maxZoom = 10;
@@ -106,10 +106,10 @@ function render() {
 
 //Animate function used by the Orbit controls
 function animate() {
-	controls.update();
-	requestAnimationFrame(animate);
-	render();
-	TWEEN.update();
+    controls.update();
+    requestAnimationFrame(animate);
+    render();
+    TWEEN.update();
 }
 
 //Update the scene when the browser window size is changed
@@ -140,20 +140,23 @@ function onDocumentMouseMove(event) {
     if (intersects.length > 0) {
 
         if (mouseOver != intersects[0].object) {
-           if (mouseOver)
+            if (mouseOver) {
                 mouseOver.material.color.setHex(mouseOver.currentHex);
-                mouseOver = intersects[0].object;
-                mouseOver.currentHex = mouseOver.material.color.getHex();
-                mouseOver.material.color.setHex(0xff0000);
+            }
+
+            mouseOver = intersects[0].object;
+            mouseOver.currentHex = mouseOver.material.color.getHex();
+            mouseOver.material.color.setHex(0xff0000);
 
         }
     }
     else {
-       if (mouseOver)
+        if (mouseOver) {
             mouseOver.material.color.setHex(mouseOver.currentHex);
-            mouseOver = null;
-
+        }
+        mouseOver = null;
     }
+
 }
 
 //When a map shape is clicked by the mouse, open the 2D map view & hide the virtual globe
@@ -197,8 +200,8 @@ function onDocumentMouseClick(event) {
         transMapShape.material.map = new THREE.TextureLoader().load(clickedObject[0].object.texture);
         mapshapeTransform(clickedObject[0].object, transMapShape, flatMapShape);
 
-		animateGlobe(-1, 0.5, 0.7);
-	}
+        animateGlobe(-1, 0.5, 0.7);
+    }
 }
 
 

@@ -23,19 +23,16 @@ var t = 0;
 var dialogClose = false;
 
 
-
 //Function to calculate the linear interpolation based on the values passed to it
-function lerp(k1, v1, k2, v2, k)
-{
-    return (k - k1)/(k2 - k1) * (v2 - v1) + v1;
+function lerp(k1, v1, k2, v2, k) {
+    return (k - k1) / (k2 - k1) * (v2 - v1) + v1;
 
 }
 
 //Function to find the upper interval value (ie: next highest value) in the array
-function findInterval(keys, k)
-{
+function findInterval(keys, k) {
 
-    for(var i = 0; i < keys.length; i++) {
+    for (var i = 0; i < keys.length; i++) {
         if ((keys[i] >= k) && (keys[0] < k)) {
             return i;
         }
@@ -44,8 +41,7 @@ function findInterval(keys, k)
 }
 
 //Function to call the lerp and findInterval functions and return the interpolated value
-function interpolator(keys, values, key)
-{
+function interpolator(keys, values, key) {
 
     var i;
     var interped;
@@ -60,14 +56,13 @@ function interpolator(keys, values, key)
 
 //Function which calculates the transition animation. Uses the time delta and the intersected
 // map shape as arguments
-function mapshapeTransform(mapShape, transMapShape, flatMapShape)
-{
+function mapshapeTransform(mapShape, transMapShape, flatMapShape) {
 
     //Assign the variable the clock delta value
     var dt = clock.getDelta();
 
     //Initialise the animation time array
-    var keys = [0, 2];
+    var keys = [0, 1];
 
     //Initialise the initial, end and transition map objects
     var initialMapShape = mapShape;
@@ -101,7 +96,7 @@ function mapshapeTransform(mapShape, transMapShape, flatMapShape)
         var newZ = interpolator(keys, zArray, t);
 
         //Checks for the NaN value, which indicates the end of the array
-        if (newZ !== newZ){
+        if (newZ !== newZ) {
             //Checks if the function call came from the dialog function or the mouse click function
             if (dialogClose != true) {
                 //Stops the clock (to reset it) and calls the show dialog function and passes the
@@ -112,7 +107,7 @@ function mapshapeTransform(mapShape, transMapShape, flatMapShape)
                 return;
             }
             //
-            else if (dialogClose == true){
+            else if (dialogClose == true) {
                 //Shows the map shape on the virtual globe, re-enables the mouse listener.
                 //controls and removes the transitional map from the scene
                 flatMapShape.visible = true;
@@ -149,10 +144,9 @@ function mapshapeTransform(mapShape, transMapShape, flatMapShape)
     //Update the transitional map vertices, renderer the new scene and request the next animation frame
     transitionMapShape.geometry.verticesNeedUpdate = true;
     renderer.render(scene, camera);
-    requestAnimationFrame(function() {
+    requestAnimationFrame(function () {
         mapshapeTransform(initialMapShape, transitionMapShape, endMapShape)
     });
-
 
 
 }
@@ -166,8 +160,7 @@ function mapshapeTransform(mapShape, transMapShape, flatMapShape)
 // to compute a third vector pointing from the camera centre to the left border of the
 // view space. The four corners are then computed by adding these two vectors to the camera
 // position.
-function calcFlatMapShape(clickedMapShape)
-{
+function calcFlatMapShape(clickedMapShape) {
 
     // compute the camera direction in world space
     // this vector is pointing from the camera position towards the centre of the sphere
@@ -185,7 +178,7 @@ function calcFlatMapShape(clickedMapShape)
     // vector from mesh centre to top of mesh
     var top = new THREE.Vector3();
     top.copy(up);
-    top.multiplyScalar((camera.top * 0.8)/ camera.zoom);
+    top.multiplyScalar((camera.top * 0.8) / camera.zoom);
 
     // vector from mesh centre to bottom of mesh
     var bottom = new THREE.Vector3();
@@ -223,53 +216,54 @@ function calcFlatMapShape(clickedMapShape)
     vertices[8].copy(meshCenter).add(bottom).add(right);
 
     return clickedMapShape;
+}
 
 // Convert from view space [-1,+1] to world space. Returned 3D coordinates are on a plane
 // passing through the origin of the world space.
 function viewSpaceToWorldSpace(viewX, viewY) {
 
-	// compute the camera direction in world space
-	// this vector is pointing from the camera position towards the centre of the sphere
-	var cameraDirection = new THREE.Vector3();
-	camera.getWorldDirection(cameraDirection);
+    // compute the camera direction in world space
+    // this vector is pointing from the camera position towards the centre of the sphere
+    var cameraDirection = new THREE.Vector3();
+    camera.getWorldDirection(cameraDirection);
 
-	// compute camera up vector in world space
-	// this direction vector points from the camera position towards the upper border of the image plane
-	// the length of up is 1.
-	var up = new THREE.Vector3();
-	var worldQuaternion = new THREE.Quaternion();
-	camera.getWorldQuaternion(worldQuaternion);
-	up.copy(camera.up).applyQuaternion(worldQuaternion);
+    // compute camera up vector in world space
+    // this direction vector points from the camera position towards the upper border of the image plane
+    // the length of up is 1.
+    var up = new THREE.Vector3();
+    var worldQuaternion = new THREE.Quaternion();
+    camera.getWorldQuaternion(worldQuaternion);
+    up.copy(camera.up).applyQuaternion(worldQuaternion);
 
-	// vector from origin to top in view space
-	var top = new THREE.Vector3();
-	top.copy(up);
-	top.multiplyScalar((camera.top) / camera.zoom * viewY);
+    // vector from origin to top in view space
+    var top = new THREE.Vector3();
+    top.copy(up);
+    top.multiplyScalar((camera.top) / camera.zoom * viewY);
 
-	// vector from origin to right side in view space
-	var right = new THREE.Vector3();
-	right.crossVectors(cameraDirection, up);
-	right.multiplyScalar((camera.right) / camera.zoom * viewX);
+    // vector from origin to right side in view space
+    var right = new THREE.Vector3();
+    right.crossVectors(cameraDirection, up);
+    right.multiplyScalar((camera.right) / camera.zoom * viewX);
 
-	return top.add(right);
+    return top.add(right);
 }
 
 // Animated move and scale of the globe
 function animateGlobe(viewX, viewY, scale) {
-	var duration = 1000;
-	var worldXY = viewSpaceToWorldSpace(viewX, viewY);
+    var duration = 1000;
+    var worldXY = viewSpaceToWorldSpace(viewX, viewY);
 
-	var positionTween = new TWEEN.Tween(earthModel.position).to({
-		x : worldXY.x,
-		y : worldXY.y,
-		z : worldXY.z
-	}, duration).easing(TWEEN.Easing.Quartic.InOut).start();
+    var positionTween = new TWEEN.Tween(earthModel.position).to({
+        x: worldXY.x,
+        y: worldXY.y,
+        z: worldXY.z
+    }, duration).easing(TWEEN.Easing.Quartic.InOut).start();
 
-	var scaleTween = new TWEEN.Tween(earthModel.scale).to({
-		x : scale,
-		y : scale,
-		z : scale
-	}, duration).start();
+    var scaleTween = new TWEEN.Tween(earthModel.scale).to({
+        x: scale,
+        y: scale,
+        z: scale
+    }, duration).start();
 }
 
 //Function to open a JQuery Dialog box which loads a HTML page
@@ -284,25 +278,25 @@ function showDialog(mapURL, initMap, transMap, endMap) {
     var winHeight = $(window).height();
     var pHeight = winHeight * 0.8;
 
-	//When the dialog window is closed, set the flag to indicate the map shape transform function call
-	//came from here, reset the time variable, start the clock and call the map shape transform function
-	//with the initial and end map coordinates reversed (so the animation goes the opposite direction)
-	var closeFunction = function() {
-		dialogClose = true;
-		t = 0;
-		clock.start();
-		mapshapeTransform(endMap, transMap, initMap);
-		animateGlobe(0, 0, 1);
-	};
+    //When the dialog window is closed, set the flag to indicate the map shape transform function call
+    //came from here, reset the time variable, start the clock and call the map shape transform function
+    //with the initial and end map coordinates reversed (so the animation goes the opposite direction)
+    var closeFunction = function () {
+        dialogClose = true;
+        t = 0;
+        clock.start();
+        mapshapeTransform(endMap, transMap, initMap);
+        animateGlobe(0, 0, 1);
+    };
 
     //Specifies the dialog box parameters
     var $dialog = $('<div></div>').html('<iframe style="border: 0; " src="' + page + '" width="100%" height="100%"></iframe>').dialog({
-        autoOpen : false,
-        modal : true,
-        height : pHeight,
-        width : pWidth,
-        title : "Atlas Map",
-        close : closeFunction
+        autoOpen: false,
+        modal: true,
+        height: pHeight,
+        width: pWidth,
+        title: "Atlas Map",
+        close: closeFunction
     });
 
     $dialog.dialog('open');
