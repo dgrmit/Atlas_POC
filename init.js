@@ -14,6 +14,20 @@
  *************************************************************************************************/
 "use strict";
 
+//Global variables
+var earthRadius = 20;
+var radOffset = 2;
+var windowScale = 0.8;
+
+var dialogRatio = dialogDim();
+
+//Set up the Three.js clock
+var clock = new THREE.Clock();
+
+//Initialise the variables used to control the map shape transition
+var t = 0;
+var dialogClose = false;
+
 //Function call to initialise the scene, camera and renderer
 var init = initScene();
 var scene = init.scene;
@@ -27,8 +41,7 @@ var raycaster = new THREE.Raycaster();
 var mouse = new THREE.Vector2();
 var mouseOver;
 
-var controls = new THREE.OrbitControls(camera/*, renderer.domElement*/);
-//controls.addEventListener( 'change', render ); // add this only if there is no animation loop (requestAnimationFrame)
+var controls = new THREE.OrbitControls(camera);
 controls.minZoom = 0.5;
 controls.maxZoom = 10;
 controls.enablePan = false;
@@ -46,7 +59,7 @@ document.addEventListener("click", onDocumentMouseClick, false);
 
 //Create the virtual globe
 var mapObjects = [];
-var earthModel = createGlobe(20, 64, 64);
+var earthModel = createGlobe(earthRadius, 64, 64);
 addMapObjects();
 
 //Add light to camera so that light rotates with camera object
@@ -62,13 +75,14 @@ scene.add(camera);
 scene.add(createAxes(50));
 renderer.render(scene, camera);
 
+
+/*************************************************************/
 /*************************************************************/
 //Function to initialise the scene, camera & scene renderer
-function initScene() {
+function initScene()
+{
 
     var container = document.createElement("div");
-    // FIXME hard-coded radius
-    var r = 20;
     //  FIXME should use size of container instead of window
     var aspectRatio = window.innerWidth / window.innerHeight;
 
@@ -77,10 +91,8 @@ function initScene() {
 
     // initial frustum for orthographic camera is size of the scene
     // near and far planes are along camera viewing axis. Near plane should > 0, as objects behind camera are never visible.
-    camera = new THREE.OrthographicCamera(-r * aspectRatio, r * aspectRatio, r, -r, 1, 100);
+    camera = new THREE.OrthographicCamera(-earthRadius * aspectRatio, earthRadius * aspectRatio, earthRadius, -earthRadius, 1, 100);
 
-    // position along z axis does not change apparent size of scene
-    //update: needed to add updateProjectMatrix to apply the zoom change.
     camera.position.z = 101;
     camera.zoom = 0.75;
     camera.updateProjectionMatrix();
@@ -93,7 +105,6 @@ function initScene() {
     //  FIXME should use size of container instead of window
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.sortObjects = false;
-    //renderer.setClearColor(0x404040, 1);
     container.appendChild(renderer.domElement);
 
     return {
@@ -104,12 +115,14 @@ function initScene() {
 }
 
 //Render function used by the Orbit controls
-function render() {
+function render()
+{
     renderer.render(scene, camera);
 }
 
 //Animate function used by the Orbit controls
-function animate() {
+function animate()
+{
     controls.update();
     requestAnimationFrame(animate);
     render();
@@ -117,22 +130,22 @@ function animate() {
 }
 
 //Update the scene when the browser window size is changed
-function onWindowResize() {
-    //  FIXME should use size of container instead
-    var r = 20;
-    // FIXME hard-coded radius
+function onWindowResize()
+{
     camera.aspect = window.innerWidth / window.innerHeight;
-    camera.left = -r * camera.aspect;
-    camera.right = r * camera.aspect;
-    camera.top = r;
-    camera.bottom = -r;
+    camera.left = -earthRadius * camera.aspect;
+    camera.right = earthRadius * camera.aspect;
+    camera.top = earthRadius;
+    camera.bottom = -earthRadius;
     camera.updateProjectionMatrix();
 
     renderer.setSize(window.innerWidth, window.innerHeight);
+    dialogRatio = dialogDim();
 }
 
 //Monitor the mouse movement and change the colour of any map object that is moused over
-function onDocumentMouseMove(event) {
+function onDocumentMouseMove(event)
+{
 
     event.preventDefault();
     mouse.x = (event.clientX / window.innerWidth ) * 2 - 1;
@@ -169,7 +182,8 @@ function onDocumentMouseMove(event) {
 }
 
 //When a map shape is clicked by the mouse, open the 2D map view & hide the virtual globe
-function onDocumentMouseClick(event) {
+function onDocumentMouseClick(event)
+{
     event.preventDefault();
 
 
@@ -215,7 +229,8 @@ function onDocumentMouseClick(event) {
 
 
 //Function to create and action the HTML buttons at the top of document
-function initControls() {
+function initControls()
+{
     var container = document.createElement("div");
     document.body.appendChild(container);
 

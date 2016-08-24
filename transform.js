@@ -15,23 +15,17 @@
  *************************************************************************************************/
 "use strict";
 
-//Global variables
-//Set up the Three.js clock
-var clock = new THREE.Clock();
-
-//Initialise the variables used to control the map shape transition
-var t = 0;
-var dialogClose = false;
-
 
 //Function to calculate the linear interpolation based on the values passed to it
-function lerp(k1, v1, k2, v2, k) {
+function lerp(k1, v1, k2, v2, k)
+{
     return (k - k1) / (k2 - k1) * (v2 - v1) + v1;
 
 }
 
 //Function to find the upper interval value (ie: next highest value) in the array
-function findInterval(keys, k) {
+function findInterval(keys, k)
+{
 
     for (var i = 0; i < keys.length; i++) {
         if ((keys[i] >= k) && (keys[0] < k)) {
@@ -42,7 +36,8 @@ function findInterval(keys, k) {
 }
 
 //Function to call the lerp and findInterval functions and return the interpolated value
-function interpolator(keys, values, key) {
+function interpolator(keys, values, key)
+{
 
     var i;
     var interped;
@@ -57,7 +52,8 @@ function interpolator(keys, values, key) {
 
 //Function which calculates the transition animation. Uses the time delta and the intersected
 // map shape as arguments
-function mapshapeTransform(mapShape, transMapShape, flatMapShape) {
+function mapshapeTransform(mapShape, transMapShape, flatMapShape)
+{
 
     //Assign the variable the clock delta value
     var dt = clock.getDelta();
@@ -73,12 +69,6 @@ function mapshapeTransform(mapShape, transMapShape, flatMapShape) {
     //Hide the initial and 2D map shapes from view
     mapShape.visible = false;
     flatMapShape.visible = false;
-
-    // console.log(initialMapShape.geometry.vertices[0]);
-    // console.log(transMapShape.geometry.vertices[0]);
-    // console.log(endMapShape.geometry.vertices[0]);
-    // console.log("-------");
-
 
     //Increment the value of t by the time delta variable to advance the animation
     t += dt;
@@ -99,7 +89,7 @@ function mapshapeTransform(mapShape, transMapShape, flatMapShape) {
         //Checks for the NaN value, which indicates the end of the array
         if (newZ !== newZ) {
             //Checks if the function call came from the dialog function or the mouse click function
-            if (dialogClose != true) {
+            if (dialogClose !== true) {
                 //Stops the clock (to reset it) and calls the show dialog function and passes the
                 //required arguments to open the correct atlas map and call the map shape transform
                 //function to reverse the animation
@@ -108,7 +98,7 @@ function mapshapeTransform(mapShape, transMapShape, flatMapShape) {
                 return;
             }
             //
-            else if (dialogClose == true) {
+            else if (dialogClose === true) {
                 //Shows the map shape on the virtual globe, re-enables the mouse listener.
                 //controls and removes the transitional map from the scene
                 flatMapShape.visible = true;
@@ -124,12 +114,10 @@ function mapshapeTransform(mapShape, transMapShape, flatMapShape) {
 
             // project point onto sphere by scaling direction vector
             var v = new THREE.Vector3(newX, newY, newZ);
-            // FIXME hard-coded radius
-            if (v.length() < 20) {
+            if (v.length() < earthRadius) {
                 var directionVector = new THREE.Vector3(newX, newY, newZ);
                 directionVector.normalize();
-                // FIXME hard-coded radius plus tolerance
-                directionVector.multiplyScalar(22);
+                directionVector.multiplyScalar((earthRadius + radOffset));
                 newX = directionVector.x;
                 newY = directionVector.y;
                 newZ = directionVector.z;
@@ -146,9 +134,8 @@ function mapshapeTransform(mapShape, transMapShape, flatMapShape) {
     transitionMapShape.geometry.verticesNeedUpdate = true;
     renderer.render(scene, camera);
     requestAnimationFrame(function () {
-        mapshapeTransform(initialMapShape, transitionMapShape, endMapShape)
+        mapshapeTransform(initialMapShape, transitionMapShape, endMapShape);
     });
-
 
 }
 
@@ -161,7 +148,8 @@ function mapshapeTransform(mapShape, transMapShape, flatMapShape) {
 // to compute a third vector pointing from the camera centre to the left border of the
 // view space. The four corners are then computed by adding these two vectors to the camera
 // position.
-function calcFlatMapShape(clickedMapShape) {
+function calcFlatMapShape(clickedMapShape)
+{
 
     // compute the camera direction in world space
     // this vector is pointing from the camera position towards the centre of the sphere
@@ -179,30 +167,29 @@ function calcFlatMapShape(clickedMapShape) {
     // vector from mesh centre to top of mesh
     var top = new THREE.Vector3();
     top.copy(up);
-    top.multiplyScalar((camera.top * 0.8) / camera.zoom);
+    top.multiplyScalar((camera.top * (windowScale - (dialogRatio.heightRatio / 2) - 0.1)) / camera.zoom);
 
     // vector from mesh centre to bottom of mesh
     var bottom = new THREE.Vector3();
     bottom.copy(up);
-    bottom.multiplyScalar((camera.bottom * 0.8) / camera.zoom);
+    bottom.multiplyScalar((camera.bottom * (windowScale - (dialogRatio.heightRatio / 2))) / camera.zoom);
 
     // vector from mesh centre to left side of mesh
     var left = new THREE.Vector3();
     left.crossVectors(cameraDirection, up);
-    left.multiplyScalar((camera.left * 0.8) / camera.zoom);
+    left.multiplyScalar((camera.left * (windowScale - (dialogRatio.widthRatio / 2))) / camera.zoom);
 
     // vector from mesh centre to right side of mesh
     var right = new THREE.Vector3();
     right.crossVectors(cameraDirection, up);
-    right.multiplyScalar((camera.right * 0.8) / camera.zoom);
+    right.multiplyScalar((camera.right * (windowScale - (dialogRatio.widthRatio / 2))) / camera.zoom);
 
     // central position of mesh
     var meshCenter = new THREE.Vector3();
     meshCenter.copy(cameraDirection);
     // camera direction is pointing towards centre of sphere
     // use negative sign for distance multiplication to invert camera direction
-    // FIXME hard-coded position
-    meshCenter.multiplyScalar(-50);
+    meshCenter.multiplyScalar(-(earthRadius * 2));
 
     // new vertex coordinates are relative to centre of mesh
     var vertices = clickedMapShape.geometry.vertices;
@@ -221,7 +208,8 @@ function calcFlatMapShape(clickedMapShape) {
 
 // Convert from view space [-1,+1] to world space. Returned 3D coordinates are on a plane
 // passing through the origin of the world space.
-function viewSpaceToWorldSpace(viewX, viewY) {
+function viewSpaceToWorldSpace(viewX, viewY)
+{
 
     // compute the camera direction in world space
     // this vector is pointing from the camera position towards the centre of the sphere
@@ -250,7 +238,8 @@ function viewSpaceToWorldSpace(viewX, viewY) {
 }
 
 // Animated move and scale of the globe
-function animateGlobe(viewX, viewY, scale) {
+function animateGlobe(viewX, viewY, scale)
+{
     var duration = 1000;
     var worldXY = viewSpaceToWorldSpace(viewX, viewY);
 
@@ -270,14 +259,15 @@ function animateGlobe(viewX, viewY, scale) {
 //Function to open a JQuery Dialog box which loads a HTML page
 //which contains the interactive 2D atlas map.
 //Function will also show the 3D elements once the 2D window is closed
-function showDialog(mapURL, initMap, transMap, endMap) {
+function showDialog(mapURL, initMap, transMap, endMap)
+{
     var page = mapURL;
 
     //Set the height & width of the dialog window to 80% of the browser window size
     var winWidth = $(window).width();
-    var pWidth = winWidth * 0.8;
+    var pWidth = winWidth * windowScale;
     var winHeight = $(window).height();
-    var pHeight = winHeight * 0.8;
+    var pHeight = winHeight * windowScale;
 
     //When the dialog window is closed, set the flag to indicate the map shape transform function call
     //came from here, reset the time variable, start the clock and call the map shape transform function
@@ -286,14 +276,17 @@ function showDialog(mapURL, initMap, transMap, endMap) {
         dialogClose = true;
         t = 0;
         clock.start();
+        $dialog.dialog('destroy');
         mapshapeTransform(endMap, transMap, initMap);
         animateGlobe(0, 0, 1);
     };
 
     //Specifies the dialog box parameters
-    var $dialog = $('<div></div>').html('<iframe style="border: 0; " src="' + page + '" width="100%" height="100%"></iframe>').dialog({
+    var $dialog = $('<div></div>').html('<iframe style="border: 0; margin: 0; padding: 0; " src="' + page + '" width="100%" height="100%"></iframe>').dialog({
         autoOpen: false,
         modal: true,
+        show: {effect: "fade", duration: 1000},
+        hide: {effect: "fade", duration: 1000},
         height: pHeight,
         width: pWidth,
         title: "Atlas Map",
@@ -302,4 +295,45 @@ function showDialog(mapURL, initMap, transMap, endMap) {
 
     $dialog.dialog('open');
 
+
+
+}
+
+//Function which returns the dialog window ratio to assist with setting up the transitional map
+function dialogDim()
+{
+    var heightRatio;
+    var widthRatio;
+
+    //Set the height & width of the dialog window to 80% of the browser window size
+    var winWidth = $(window).width();
+    var pWidth = winWidth * windowScale;
+    var winHeight = $(window).height();
+    var pHeight = winHeight * windowScale;
+
+    //Specifies the dialog box parameters
+    var $dialog = $('<div></div>').html('<iframe style="border: 0; margin: 0; padding: 0; " src="./atlasmaps/test-map.html" width="100%" height="100%"></iframe>').dialog({
+        autoOpen: false,
+        height: pHeight,
+        width: pWidth
+    });
+
+    $dialog.dialog('open');
+
+
+    heightRatio = 1 - $dialog.height()/$dialog.innerHeight();
+    widthRatio = 1 - $dialog.width()/$dialog.innerWidth();
+    console.log("height is ",pHeight);
+    console.log("Inner height is ", $dialog.innerHeight());
+    console.log("Width is ", pWidth);
+    console.log("Inner width is ", $dialog.innerWidth());
+    console.log("dialog height is ", $dialog.height());
+    console.log("dialog width is ", $dialog.width());
+    console.log("title bar size is ", $dialog);
+    $dialog.dialog('close');
+
+    return {
+        heightRatio: heightRatio,
+        widthRatio: widthRatio
+    };
 }

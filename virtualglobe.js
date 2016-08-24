@@ -71,7 +71,8 @@ function toRadians (angle)
  * Convert geographic latitude and longitude to WebGL XYZ coordinate system. This
  * uses code from threejs SphereBufferGeometry.
  */
-function convertLatLongToWebGLXYZ(radius, lat, lon) {
+function convertLatLongToWebGLXYZ(radius, lat, lon)
+{
 
     // SphereBufferGeometry uses a polar (or zenithal angle). Latidude is an elevation angle.
     // So convert from polar angle to elevation angle.
@@ -132,7 +133,7 @@ function createMapShape(lat1, long1, lat2, long2)
     var vertexCoord;
 
     for (var i = 0; i < 9; i++){
-        vertexCoord = convertLatLongToWebGLXYZ(20.5, latArray[i], longArray[i]);
+        vertexCoord = convertLatLongToWebGLXYZ((earthRadius + 0.5), latArray[i], longArray[i]);
         geometry.vertices.push(new THREE.Vector3(vertexCoord.x, vertexCoord.y, vertexCoord.z));
     }
 
@@ -184,21 +185,18 @@ function createMapShape(lat1, long1, lat2, long2)
 //Function to create the map shapes on the virtual globe
 function addMapObjects()
 {
-    //var mapSection = createMapShape(49, 4, 44, 15);
+    //Define the location of each shape (top left lat/long and bottom right lat/long) and create the
+    //new shape in the corresponding location on the virtual globe
     var mapSection = createMapShape(60, -10, 40, 20);
     var mapSection2 = createMapShape(-20, 120, -40, 150);
 
+    //Define the corresponding atlas map and preview image per map section
     mapSection.url = "./atlasmaps/test-map.html";
     mapSection.texture = "./atlasmaps/mapsection.jpg";
     mapSection2.url = "./atlasmaps/test-map2.html";
     mapSection2.texture = "./atlasmaps/mapsection2.jpg";
-    //scene.add(mapSection);
-    //scene.add(mapSection2);
 
-    // mapSection.material.map = new THREE.TextureLoader().load(mapSection.texture);
-    // mapSection.material.transparent = false;
-    // mapSection.material.color.setHex(0xffffff);
-
+    //Add the new object to the map objects array and add it as a child of the virtual globe
     mapObjects.push(mapSection);
     mapObjects.push(mapSection2);
     earthModel.add(mapSection);
@@ -210,7 +208,7 @@ function addMapObjects()
 
 
 
-
+/*********************************************************************************************/
 /*********************************************************************************************
 //Alternate method to create custom shape on the virtual globe
 //Uses the 2D map extents and translates Lat/Long to XYZ coords
