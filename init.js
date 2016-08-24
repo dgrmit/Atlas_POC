@@ -92,6 +92,7 @@ function initScene() {
 
     //  FIXME should use size of container instead of window
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.sortObjects = false;
     //renderer.setClearColor(0x404040, 1);
     container.appendChild(renderer.domElement);
 
@@ -142,20 +143,25 @@ function onDocumentMouseMove(event) {
 
     if (intersects.length > 0) {
 
-        if (mouseOver != intersects[0].object) {
+        if (mouseOver !== intersects[0].object) {
             if (mouseOver) {
                 mouseOver.material.color.setHex(mouseOver.currentHex);
+
             }
 
             mouseOver = intersects[0].object;
             mouseOver.currentHex = mouseOver.material.color.getHex();
-            mouseOver.material.color.setHex(0xff0000);
+            mouseOver.material.color.setHex(0xffffff);
+            mouseOver.material.opacity = 0.8;
+            mouseOver.material.map = new THREE.TextureLoader().load(mouseOver.texture);
+            mouseOver.material.needsUpdate = true;
 
         }
     }
     else {
         if (mouseOver) {
             mouseOver.material.color.setHex(mouseOver.currentHex);
+            mouseOver.material.opacity = 0.5;
         }
         mouseOver = null;
     }
