@@ -59,7 +59,7 @@ function mapshapeTransform(mapShape, transMapShape, flatMapShape)
     var dt = clock.getDelta();
 
     //Initialise the animation time array
-    var keys = [0, 1];
+    var keys = [0, animationTime];
 
     //Initialise the initial, end and transition map objects
     var initialMapShape = mapShape;
@@ -86,7 +86,7 @@ function mapshapeTransform(mapShape, transMapShape, flatMapShape)
         var newY = interpolator(keys, yArray, t);
         var newZ = interpolator(keys, zArray, t);
 
-        //Checks for the NaN value, which indicates the end of the array
+        //Checks for the NaN value, which indicates the computed value is outside the valid range
         if (newZ !== newZ) {
             //Checks if the function call came from the dialog function or the mouse click function
             if (dialogClose !== true) {
@@ -94,7 +94,7 @@ function mapshapeTransform(mapShape, transMapShape, flatMapShape)
                 //required arguments to open the correct atlas map and call the map shape transform
                 //function to reverse the animation
                 clock.stop();
-                showDialog(mapShape.url, mapShape, transMapShape, flatMapShape);
+                //showDialog(mapShape.url, mapShape, transMapShape, flatMapShape);
                 return;
             }
             //
@@ -240,7 +240,7 @@ function viewSpaceToWorldSpace(viewX, viewY)
 // Animated move and scale of the globe
 function animateGlobe(viewX, viewY, scale)
 {
-    var duration = 1000;
+    var duration = animationTime * 1000;
     var worldXY = viewSpaceToWorldSpace(viewX, viewY);
 
     var positionTween = new TWEEN.Tween(earthModel.position).to({
@@ -276,25 +276,26 @@ function showDialog(mapURL, initMap, transMap, endMap)
         dialogClose = true;
         t = 0;
         clock.start();
-        $dialog.dialog('destroy');
         mapshapeTransform(endMap, transMap, initMap);
         animateGlobe(0, 0, 1);
+        $dialog.dialog('destroy');
     };
 
     //Specifies the dialog box parameters
     var $dialog = $('<div></div>').html('<iframe style="border: 0; margin: 0; padding: 0; " src="' + page + '" width="100%" height="100%"></iframe>').dialog({
         autoOpen: false,
         modal: true,
-        show: {effect: "fade", duration: 1000},
-        hide: {effect: "fade", duration: 1000},
+        show: {effect: "fade", duration: ((animationTime * 2000) * 0.75)},
+        hide: {effect: "fade", duration: ((animationTime * 1000) * 0.5)},
         height: pHeight,
         width: pWidth,
         title: "Atlas Map",
         close: closeFunction
     });
 
-    $dialog.dialog('open');
-
+    //Start the animation after a small delay
+    setTimeout(function(){$dialog.dialog("open");},500);
+    //$dialog.dialog("open");
 
 
 }
@@ -320,16 +321,9 @@ function dialogDim()
 
     $dialog.dialog('open');
 
-
+    //Calculate the height and width ratios between the inner and outer dimensions
     heightRatio = 1 - $dialog.height()/$dialog.innerHeight();
     widthRatio = 1 - $dialog.width()/$dialog.innerWidth();
-    console.log("height is ",pHeight);
-    console.log("Inner height is ", $dialog.innerHeight());
-    console.log("Width is ", pWidth);
-    console.log("Inner width is ", $dialog.innerWidth());
-    console.log("dialog height is ", $dialog.height());
-    console.log("dialog width is ", $dialog.width());
-    console.log("title bar size is ", $dialog);
     $dialog.dialog('close');
 
     return {

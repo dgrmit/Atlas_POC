@@ -133,7 +133,7 @@ function createMapShape(lat1, long1, lat2, long2)
     var vertexCoord;
 
     for (var i = 0; i < 9; i++){
-        vertexCoord = convertLatLongToWebGLXYZ((earthRadius + 0.5), latArray[i], longArray[i]);
+        vertexCoord = convertLatLongToWebGLXYZ((earthRadius + 0.6), latArray[i], longArray[i]);
         geometry.vertices.push(new THREE.Vector3(vertexCoord.x, vertexCoord.y, vertexCoord.z));
     }
 
@@ -188,13 +188,13 @@ function addMapObjects()
     //Define the location of each shape (top left lat/long and bottom right lat/long) and create the
     //new shape in the corresponding location on the virtual globe
     var mapSection = createMapShape(60, -10, 40, 20);
-    var mapSection2 = createMapShape(-20, 120, -40, 150);
+    var mapSection2 = createMapShape(-10, 112, -43, 155);
 
     //Define the corresponding atlas map and preview image per map section
     mapSection.url = "./atlasmaps/test-map.html";
     mapSection.texture = "./atlasmaps/mapsection.jpg";
     mapSection2.url = "./atlasmaps/test-map2.html";
-    mapSection2.texture = "./atlasmaps/mapsection2.jpg";
+    mapSection2.texture = "./atlasmaps/ausmap-thumb.jpg";
 
     //Add the new object to the map objects array and add it as a child of the virtual globe
     mapObjects.push(mapSection);

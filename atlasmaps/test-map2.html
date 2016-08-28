@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Simple Map 2</title>
+    <title>Map of Australia</title>
     <meta name="viewport" content="initial-scale=1.0">
     <meta charset="utf-8">
     <style>
@@ -10,6 +10,17 @@
         margin: 0;
         padding: 0;
       }
+      img {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        max-width: 100%;
+        max-height: 100%;
+        margin: auto;
+        overflow: auto;
+      }
       #map {
         height: 100%;
       }
@@ -17,6 +28,7 @@
   </head>
   <body>
     <div id="map"></div>
+    <!--
     <script>
       var map;
       function initMap() {
@@ -28,5 +40,7 @@
     </script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCdd8uBB2hdaadb7dqbb2sANzNnfvlN5RI&callback=initMap"
     async defer></script>
+    -->
+  <img src="./ausmap.jpg" alt="Map of Australia" width="1024px">
   </body>
 </html>
