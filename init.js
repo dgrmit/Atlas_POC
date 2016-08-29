@@ -23,7 +23,7 @@ var windowScale = 0.8;
 var animationTime = 1;
 
 //Get the dialog box ratios based on the browser window size
-var dialogRatio = dialogDim();
+var dialogRatio;
 
 //Set up the Three.js clock
 var clock = new THREE.Clock();
@@ -76,7 +76,7 @@ initControls();
 scene.add(earthModel);
 scene.add(ambLight);
 scene.add(camera);
-scene.add(createAxes(50));
+//scene.add(createAxes(50));
 renderer.render(scene, camera);
 
 
@@ -166,7 +166,7 @@ function onDocumentMouseMove(event)
             mouseOver = intersects[0].object;
             mouseOver.currentHex = mouseOver.material.color.getHex();
             mouseOver.material.color.setHex(0xffffff);
-            mouseOver.material.opacity = 0.8;
+            mouseOver.material.opacity = 0.6;
             mouseOver.material.map = new THREE.TextureLoader().load(mouseOver.texture);
             mouseOver.material.needsUpdate = true;
 
@@ -177,7 +177,7 @@ function onDocumentMouseMove(event)
             mouseOver.material.color.setHex(mouseOver.currentHex);
             mouseOver.material.map = null;
             mouseOver.material.needsUpdate = true;
-            mouseOver.material.opacity = 0.5;
+            mouseOver.material.opacity = 0.2;
         }
         mouseOver = null;
     }
@@ -198,6 +198,9 @@ function onDocumentMouseClick(event)
     //Runs the following statements when a map shape has been clicked
     //Note, distance limit set to avoid shapes on other side of globe being activated.
     if ((clickedObject.length > 0) && (clickedObject[0].distance < 100)) {
+
+        //Get the dimensions of the dialog box based on the clicked object settings
+        dialogRatio = dialogDim(clickedObject[0].object.url, clickedObject[0].object.scaleFactor);
 
         //Set the elapsed time variable to 0 (reset timer after any previous transitions)
         t = 0;
@@ -226,7 +229,7 @@ function onDocumentMouseClick(event)
         transMapShape.material.color.setHex(0xffffff);
         transMapShape.material.map = new THREE.TextureLoader().load(clickedObject[0].object.texture);
         mapshapeTransform(clickedObject[0].object, transMapShape, flatMapShape);
-        showDialog(clickedObject[0].object.url, clickedObject[0].object, transMapShape, flatMapShape);
+        showDialog(clickedObject[0].object.url, clickedObject[0].object.title, clickedObject[0].object, transMapShape, flatMapShape);
         animateGlobe(-1, 0.5, 0.7);
     }
 }

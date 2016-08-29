@@ -167,7 +167,7 @@ function calcFlatMapShape(clickedMapShape)
     // vector from mesh centre to top of mesh
     var top = new THREE.Vector3();
     top.copy(up);
-    top.multiplyScalar((camera.top * (windowScale - (dialogRatio.heightRatio / 2) - 0.1)) / camera.zoom);
+    top.multiplyScalar((camera.top * (windowScale - (dialogRatio.heightRatio / 2) - 0.08)) / camera.zoom);
 
     // vector from mesh centre to bottom of mesh
     var bottom = new THREE.Vector3();
@@ -177,12 +177,12 @@ function calcFlatMapShape(clickedMapShape)
     // vector from mesh centre to left side of mesh
     var left = new THREE.Vector3();
     left.crossVectors(cameraDirection, up);
-    left.multiplyScalar((camera.left * (windowScale - (dialogRatio.widthRatio / 2))) / camera.zoom);
+    left.multiplyScalar((camera.left * ((dialogRatio.scaledDim / $(window).width()) - (dialogRatio.widthRatio / 2))) / camera.zoom);
 
     // vector from mesh centre to right side of mesh
     var right = new THREE.Vector3();
     right.crossVectors(cameraDirection, up);
-    right.multiplyScalar((camera.right * (windowScale - (dialogRatio.widthRatio / 2))) / camera.zoom);
+    right.multiplyScalar((camera.right * ((dialogRatio.scaledDim / $(window).width()) - (dialogRatio.widthRatio / 2))) / camera.zoom);
 
     // central position of mesh
     var meshCenter = new THREE.Vector3();
@@ -259,13 +259,11 @@ function animateGlobe(viewX, viewY, scale)
 //Function to open a JQuery Dialog box which loads a HTML page
 //which contains the interactive 2D atlas map.
 //Function will also show the 3D elements once the 2D window is closed
-function showDialog(mapURL, initMap, transMap, endMap)
+function showDialog(mapURL, mapTitle, initMap, transMap, endMap)
 {
     var page = mapURL;
 
     //Set the height & width of the dialog window to 80% of the browser window size
-    var winWidth = $(window).width();
-    var pWidth = winWidth * windowScale;
     var winHeight = $(window).height();
     var pHeight = winHeight * windowScale;
 
@@ -282,14 +280,15 @@ function showDialog(mapURL, initMap, transMap, endMap)
     };
 
     //Specifies the dialog box parameters
-    var $dialog = $('<div></div>').html('<iframe style="border: 0; margin: 0; padding: 0; " src="' + page + '" width="100%" height="100%"></iframe>').dialog({
+    var $dialog = $('<div></div>').html('<iframe style="border: 0; margin: 0; padding: 0; width: 100%; height: 100%" src="' + page + '"></iframe>').dialog({
         autoOpen: false,
         modal: true,
+        resizable: false,
         show: {effect: "fade", duration: ((animationTime * 2000) * 0.75)},
         hide: {effect: "fade", duration: ((animationTime * 1000) * 0.5)},
         height: pHeight,
-        width: pWidth,
-        title: "Atlas Map",
+        width: dialogRatio.scaledDim,
+        title: mapTitle,
         close: closeFunction
     });
 
@@ -301,10 +300,14 @@ function showDialog(mapURL, initMap, transMap, endMap)
 }
 
 //Function which returns the dialog window ratio to assist with setting up the transitional map
-function dialogDim()
+function dialogDim(mapURL, scaleFactor)
 {
+    var page = mapURL;
+
     var heightRatio;
     var widthRatio;
+    var scaledDim;
+
 
     //Set the height & width of the dialog window to 80% of the browser window size
     var winWidth = $(window).width();
@@ -313,7 +316,7 @@ function dialogDim()
     var pHeight = winHeight * windowScale;
 
     //Specifies the dialog box parameters
-    var $dialog = $('<div></div>').html('<iframe style="border: 0; margin: 0; padding: 0; " src="./atlasmaps/test-map.html" width="100%" height="100%"></iframe>').dialog({
+    var $dialog = $('<div></div>').html('<iframe id="frame" style="border: 0; margin: 0; padding: 0; " src="' + page + '" width="100%" height="100%"></iframe>').dialog({
         autoOpen: false,
         height: pHeight,
         width: pWidth
@@ -322,12 +325,14 @@ function dialogDim()
     $dialog.dialog('open');
 
     //Calculate the height and width ratios between the inner and outer dimensions
-    heightRatio = 1 - $dialog.height()/$dialog.innerHeight();
-    widthRatio = 1 - $dialog.width()/$dialog.innerWidth();
+    heightRatio = 1 - $dialog.height() / $dialog.innerHeight();
+    widthRatio = 1 - $dialog.width() / $dialog.innerWidth();
+    scaledDim= $dialog.height() * scaleFactor;
     $dialog.dialog('close');
 
     return {
         heightRatio: heightRatio,
-        widthRatio: widthRatio
+        widthRatio: widthRatio,
+        scaledDim: scaledDim
     };
 }

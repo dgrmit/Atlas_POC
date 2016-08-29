@@ -170,7 +170,7 @@ function createMapShape(lat1, long1, lat2, long2)
     geometry.faceVertexUvs[0].push([UVs[7], UVs[8], UVs[5]]);
 
 
-    var material = new THREE.MeshBasicMaterial({color: Math.random() * 0xffffff, transparent: true, opacity: 0.5 });
+    var material = new THREE.MeshBasicMaterial({color: 0xffffff, transparent: true, opacity: 0.2 });
     var mapShapeMesh = new THREE.Mesh(geometry, material);
 
     mapShapeMesh.material.wireframe = false;
@@ -187,20 +187,31 @@ function addMapObjects()
 {
     //Define the location of each shape (top left lat/long and bottom right lat/long) and create the
     //new shape in the corresponding location on the virtual globe
-    var mapSection = createMapShape(60, -10, 40, 20);
+    var mapSection = createMapShape(60, -12, 35, 20);
     var mapSection2 = createMapShape(-10, 112, -43, 155);
+    var mapSection3 = createMapShape(32, -120, 0, -75);
 
     //Define the corresponding atlas map and preview image per map section
     mapSection.url = "./atlasmaps/test-map.html";
-    mapSection.texture = "./atlasmaps/mapsection.jpg";
+    mapSection.texture = "./atlasmaps/europemap-detailed-thumb.jpg";
+    mapSection.scaleFactor = 1864 / 2048;
+    mapSection.title = "Map of Western Europe";
     mapSection2.url = "./atlasmaps/test-map2.html";
     mapSection2.texture = "./atlasmaps/ausmap-thumb.jpg";
+    mapSection2.scaleFactor = 2048 / 2048;
+    mapSection2.title = "Map of Australia";
+    mapSection3.url = "./atlasmaps/test-map3.html";
+    mapSection3.texture = "./atlasmaps/centralamerica-thumb.jpg";
+    mapSection3.scaleFactor = 1024 / 738;
+    mapSection3.title = "Map of Central America & The Caribbean";
 
     //Add the new object to the map objects array and add it as a child of the virtual globe
     mapObjects.push(mapSection);
     mapObjects.push(mapSection2);
+    mapObjects.push(mapSection3);
     earthModel.add(mapSection);
     earthModel.add(mapSection2);
+    earthModel.add(mapSection3);
 
 }
 
