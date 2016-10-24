@@ -1,20 +1,8 @@
 /*************************************************************************************************
  Filename: transform.js
- Author: Daniel Guglielmi (#3423059)
-
- Description:
-
- All Project Files & Short Description
-
-
- Ancillary files
- jquery-1.12.3.min.js - JQuery library (used for notify.js plugin)
- notify.js - JQuery plugin used for visual notifications
- three.js - Three.js library
- trackballcontrols.js - Trackball control library file
+ Author: Daniel Guglielmi
  *************************************************************************************************/
 "use strict";
-
 
 //Function to calculate the linear interpolation based on the values passed to it
 function lerp(k1, v1, k2, v2, k)
@@ -49,9 +37,9 @@ function interpolator(keys, values, key)
 
 }
 
-
 //Function which calculates the transition animation. Uses the time delta and the intersected
-// map shape as arguments
+//map shape as arguments
+//Edited by Dr Bernhard Jenny
 function mapshapeTransform(mapShape, transMapShape, flatMapShape)
 {
 
@@ -90,14 +78,11 @@ function mapshapeTransform(mapShape, transMapShape, flatMapShape)
         if (newZ !== newZ) {
             //Checks if the function call came from the dialog function or the mouse click function
             if (dialogClose !== true) {
-                //Stops the clock (to reset it) and calls the show dialog function and passes the
-                //required arguments to open the correct atlas map and call the map shape transform
-                //function to reverse the animation
+                //Stops the clock (to reset it) 
                 clock.stop();
-                //showDialog(mapShape.url, mapShape, transMapShape, flatMapShape);
                 return;
             }
-            //
+            
             else if (dialogClose === true) {
                 //Shows the map shape on the virtual globe, re-enables the mouse listener.
                 //controls and removes the transitional map from the scene
@@ -123,6 +108,7 @@ function mapshapeTransform(mapShape, transMapShape, flatMapShape)
                 newZ = directionVector.z;
             }
 
+			//Update the vertex with the new position coordinates
             transitionMapShape.geometry.vertices[i].x = newX;
             transitionMapShape.geometry.vertices[i].y = newY;
             transitionMapShape.geometry.vertices[i].z = newZ;
@@ -148,6 +134,8 @@ function mapshapeTransform(mapShape, transMapShape, flatMapShape)
 // to compute a third vector pointing from the camera centre to the left border of the
 // view space. The four corners are then computed by adding these two vectors to the camera
 // position.
+// Contributed by Dr Bernhard Jenny
+// Edited by Daniel Guglielmi
 function calcFlatMapShape(clickedMapShape)
 {
 
@@ -208,6 +196,7 @@ function calcFlatMapShape(clickedMapShape)
 
 // Convert from view space [-1,+1] to world space. Returned 3D coordinates are on a plane
 // passing through the origin of the world space.
+// Contributed by Dr Bernhard Jenny
 function viewSpaceToWorldSpace(viewX, viewY)
 {
 
@@ -238,6 +227,7 @@ function viewSpaceToWorldSpace(viewX, viewY)
 }
 
 // Animated move and scale of the globe
+// Contributed by Dr Bernhard Jenny
 function animateGlobe(viewX, viewY, scale)
 {
     var duration = animationTime * 1000;
@@ -327,7 +317,7 @@ function dialogDim(mapURL, scaleFactor)
     //Calculate the height and width ratios between the inner and outer dimensions
     heightRatio = 1 - $dialog.height() / $dialog.innerHeight();
     widthRatio = 1 - $dialog.width() / $dialog.innerWidth();
-    scaledDim= $dialog.height() * scaleFactor;
+    scaledDim = $dialog.height() * scaleFactor;
     $dialog.dialog('close');
 
     return {

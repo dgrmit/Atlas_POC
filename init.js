@@ -1,22 +1,13 @@
 /*************************************************************************************************
  Filename: init.js
- Author: Daniel Guglielmi (#3423059)
-
- Description: Main JS file which initialises the scene, camera, renderer and trackball controls.
-
- All Project Files & Short Description
-
- Ancillary files
- jquery-1.12.3.min.js - JQuery library (used for notify.js plugin)
- notify.js - JQuery plugin used for visual notifications
- three.js - Three.js library
- trackballcontrols.js - Trackball control library file
+ Author: Daniel Guglielmi
  *************************************************************************************************/
 "use strict";
 
 //Global variables
 
-//Adjustable variables
+//Adjustable variables for the globe radius, offset, window scale percentange
+//and animation time
 var earthRadius = 20;
 var radOffset = 2;
 var windowScale = 0.8;
@@ -45,6 +36,12 @@ var raycaster = new THREE.Raycaster();
 var mouse = new THREE.Vector2();
 var mouseOver;
 
+//Create the virtual globe
+var mapObjects = [];
+var earthModel = createGlobe(earthRadius, 64, 64);
+addMapObjects();
+
+//Initialise the camera controls
 var controls = new THREE.OrbitControls(camera);
 controls.minZoom = 0.5;
 controls.maxZoom = 10;
@@ -52,19 +49,14 @@ controls.enablePan = false;
 animate();
 
 //Set the light source and position
-var ambLight = new THREE.AmbientLight(0xaaaaaa);
-var light = new THREE.DirectionalLight(0xffffff, 0.3);
-light.position.set(50, 30, 50);
+var ambLight = new THREE.AmbientLight(0xaaabbb);
+var light = new THREE.DirectionalLight(0xffffff, 0.35);
+light.position.set(200, 50, 30);
 
 //Set up the listeners (windows resize, mouse move and mouse click)
 window.addEventListener("resize", onWindowResize, false);
 document.addEventListener("mousemove", onDocumentMouseMove, false);
 document.addEventListener("click", onDocumentMouseClick, false);
-
-//Create the virtual globe
-var mapObjects = [];
-var earthModel = createGlobe(earthRadius, 64, 64);
-addMapObjects();
 
 //Add light to camera so that light rotates with camera object
 camera.add(light);
@@ -94,12 +86,14 @@ function initScene()
 
     // initial frustum for orthographic camera is size of the scene
     // near and far planes are along camera viewing axis. Near plane should > 0, as objects behind camera are never visible.
+	//Contributed by Dr Bernhard Jenny
     camera = new THREE.OrthographicCamera(-earthRadius * aspectRatio, earthRadius * aspectRatio, earthRadius, -earthRadius, 1, 100);
 
     camera.position.z = 101;
     camera.zoom = 0.75;
     camera.updateProjectionMatrix();
 
+	//Initialise the WebGL renderer
     renderer = new THREE.WebGLRenderer({
         antialias: true
     });
@@ -130,7 +124,8 @@ function animate()
     TWEEN.update();
 }
 
-//Update the scene when the browser window size is changed
+//Update the scene size when the browser window size is changed
+//Edited by Dr Bernhard Jenny
 function onWindowResize()
 {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -147,22 +142,28 @@ function onWindowResize()
 //Monitor the mouse movement and change the colour of any map object that is moused over
 function onDocumentMouseMove(event)
 {
-
+	//Map the mouse position from screen coords to NDC
     event.preventDefault();
     mouse.x = (event.clientX / window.innerWidth ) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight ) * 2 + 1;
 
+	//Initialise the raycaster
     raycaster.setFromCamera(mouse, camera);
     var intersects = raycaster.intersectObjects(mapObjects);
 
+	//Check when the mouse intersects with a valid 3D object
     if (intersects.length > 0) {
 
+		//If the mouse no longer intersects the object, return the original colour
         if (mouseOver !== intersects[0].object) {
             if (mouseOver) {
                 mouseOver.material.color.setHex(mouseOver.currentHex);
 
             }
 
+			//Copy the intersected variable to the mouse variable
+			//Record current colour settings
+			//Set the new colour & opacity and load the preview map
             mouseOver = intersects[0].object;
             mouseOver.currentHex = mouseOver.material.color.getHex();
             mouseOver.material.color.setHex(0xffffff);
@@ -173,12 +174,15 @@ function onDocumentMouseMove(event)
         }
     }
     else {
+		//When the mouse no longer intersects, set the original colour & opacity
+		//and clear the preview map
         if (mouseOver) {
             mouseOver.material.color.setHex(mouseOver.currentHex);
             mouseOver.material.map = null;
             mouseOver.material.needsUpdate = true;
             mouseOver.material.opacity = 0.2;
         }
+		//Clear the mouse variable
         mouseOver = null;
     }
 
@@ -187,11 +191,13 @@ function onDocumentMouseMove(event)
 //When a map shape is clicked by the mouse, open the 2D map view & hide the virtual globe
 function onDocumentMouseClick(event)
 {
+
+	//Map the mouse position from screen coords to NDC
     event.preventDefault();
-
-
     mouse.x = (event.clientX / renderer.domElement.clientWidth ) * 2 - 1;
     mouse.y = -(event.clientY / renderer.domElement.clientHeight ) * 2 + 1;
+	
+	//Initialise the raycaster
     raycaster.setFromCamera(mouse, camera);
     var clickedObject = raycaster.intersectObjects(mapObjects);
 

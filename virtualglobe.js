@@ -1,17 +1,6 @@
 /*************************************************************************************************
  Filename: virtualglobe.js
- Author: Daniel Guglielmi (#3423059)
-
- Description:
-
- All Project Files & Short Description
-
-
- Ancillary files
- jquery-1.12.3.min.js - JQuery library (used for notify.js plugin)
- notify.js - JQuery plugin used for visual notifications
- three.js - Three.js library
- trackballcontrols.js - Trackball control library file
+ Author: Daniel Guglielmi
  *************************************************************************************************/
 "use strict";
 
@@ -29,10 +18,11 @@ function createGlobe(radius, wSeg, hSeg)
     //
     // The documentation seems to be wrong for SphereGeometry. It explains that the vertical sweep is around
     // the Z axis, however, this is the X axis.
+	// Edited by Dr Bernhard Jenny
     var geometry = new THREE.SphereGeometry(radius, wSeg, hSeg, -Math.PI / 2, Math.PI * 2, 0, Math.PI);
 
     // apply a diffused material
-    var material = new THREE.MeshPhongMaterial();
+	var material = new THREE.MeshPhongMaterial();
     var globeMesh = new THREE.Mesh(geometry, material);
 
     //Load and add the textures
@@ -41,17 +31,17 @@ function createGlobe(radius, wSeg, hSeg)
 
     // enable mipmaps and anisotropic filtering for better looking texturing
     // note: mipmaps need power-of-2 texture size
-    globeMesh.material.map.anisotropy = renderer.getMaxAnisotropy();
+	globeMesh.material.map.anisotropy = renderer.getMaxAnisotropy();
     globeMesh.material.map.magFilter = THREE.NearestFilter;
-    globeMesh.material.map.minFilter = THREE.LinearMipMapLinearFilter;
+	globeMesh.material.map.minFilter = THREE.LinearMipMapLinearFilter;
 
     // bump mapping
-    globeMesh.material.bumpMap = loader.load("./textures/earthbump1k.jpg");
-    globeMesh.material.bumpScale = 0.03;
+	globeMesh.material.bumpMap = loader.load("./textures/elev_bump_8k.jpg");
+	globeMesh.material.bumpScale = 0.03;
 
     // specular Phong reflection
-    globeMesh.material.specularMap = loader.load("./textures/water_4k.png");
-    globeMesh.material.specular = new THREE.Color("grey");
+	globeMesh.material.specularMap = loader.load("./textures/water_8k.png");
+	globeMesh.material.specular = new THREE.Color("grey");
 
     globeMesh.name = "globeMesh";
 
@@ -65,12 +55,9 @@ function toRadians (angle)
     return angle * (Math.PI / 180);
 }
 
-
-
-/**
- * Convert geographic latitude and longitude to WebGL XYZ coordinate system. This
- * uses code from threejs SphereBufferGeometry.
- */
+// Convert geographic latitude and longitude to WebGL XYZ coordinate system. This
+// uses code from threejs SphereBufferGeometry.
+// Edited by Dr Bernhard Jenny 
 function convertLatLongToWebGLXYZ(radius, lat, lon)
 {
 
@@ -82,8 +69,8 @@ function convertLatLongToWebGLXYZ(radius, lat, lon)
     // Add 90 degrees to bring the central meridian to where the WebGL z axis intersects the sphere.
     lon = toRadians(lon + 90);
 
-    // transformation from spherical coordinates to Cartesian coordinates
-    // copied from SphereBufferGeometry
+    // transformation from geographic coordinates to Cartesian coordinates
+    // from SphereBufferGeometry
     // https://github.com/mrdoob/three.js/blob/master/src/extras/geometries/SphereBufferGeometry.js
     var x = -radius * Math.cos(lon) * Math.sin(lat);
     var y = radius * Math.cos(lat);
@@ -180,8 +167,6 @@ function createMapShape(lat1, long1, lat2, long2)
 
 }
 
-
-
 //Function to create the map shapes on the virtual globe
 function addMapObjects()
 {
@@ -198,7 +183,7 @@ function addMapObjects()
     mapSection.title = "Map of Western Europe";
     mapSection2.url = "./atlasmaps/test-map2.html";
     mapSection2.texture = "./atlasmaps/ausmap-thumb.jpg";
-    mapSection2.scaleFactor = 2048 / 2048;
+    mapSection2.scaleFactor = 1024 / 1024;
     mapSection2.title = "Map of Australia";
     mapSection3.url = "./atlasmaps/test-map3.html";
     mapSection3.texture = "./atlasmaps/centralamerica-thumb.jpg";
@@ -208,104 +193,11 @@ function addMapObjects()
     //Add the new object to the map objects array and add it as a child of the virtual globe
     mapObjects.push(mapSection);
     mapObjects.push(mapSection2);
-    mapObjects.push(mapSection3);
+	mapObjects.push(mapSection3);
     earthModel.add(mapSection);
     earthModel.add(mapSection2);
     earthModel.add(mapSection3);
 
 }
 
-
-
-
-
-/*********************************************************************************************/
-/*********************************************************************************************
-//Alternate method to create custom shape on the virtual globe
-//Uses the 2D map extents and translates Lat/Long to XYZ coords
-function createMapShape(lat1, long1, lat2, long2)
-{
-    var numCollisions = 0;
-
-    //Determine the shape size
-    var planeHeight = Math.abs(lat1 - lat2);
-    var planeWidth =  Math.abs(long2 - long1);
-
-    //Find the mid-point between coords
-    var planeCentreLat = 0.5 * (lat2 - lat1) + lat1;
-    var planeCentreLong = ((long1 + long2) / 2) + 90;
-
-    //Convert the Plane centre Lat/Long to XYZ
-    var planeX = Math.sin(toRadians(planeCentreLong)) * Math.cos(toRadians(planeCentreLat)) * 20;
-    var planeY = Math.sin(toRadians(planeCentreLong)) * Math.sin(toRadians(planeCentreLat)) * 20;
-    var planeZ = Math.cos(toRadians(planeCentreLong)) * 20;
-
-    console.log("x: ", planeX);
-    console.log("y: ", planeY);
-    console.log("z: ", planeZ);
-
-    var mapShape = new THREE.PlaneGeometry(planeWidth, planeHeight, 10, 10);
-    var mapShapeMaterial = new THREE.MeshBasicMaterial({color: Math.random() * 0xffffff, transparent: true, opacity: 0.5 });
-    var mapShapeMesh = new THREE.Mesh(mapShape, mapShapeMaterial);
-
-    mapShapeMesh.material.side = THREE.DoubleSide;
-    mapShapeMesh.position.z = planeZ;
-    mapShapeMesh.position.y = planeY;
-    mapShapeMesh.position.x = planeX;
-
-    mapShapeMesh.rotation.x = -toRadians(planeCentreLat);
-    mapShapeMesh.rotation.y = -toRadians(planeCentreLong - 90);
-
-    return mapShapeMesh;
-}
-*/
-
-
-
-/*
-//This needs to be modified so that it loads a texture
-//onto a custom shape on the virtual globe, before the
-//animation starts
-function createMapShape(shapeWd, shapeHt, shapeRotX, shapeRotY)
-{
-    var numCollisions = 0;
-
-    var mapShape = new THREE.PlaneGeometry(shapeWd, shapeHt, 10, 10);
-    var mapShapeMaterial = new THREE.MeshBasicMaterial({color: Math.random() * 0xffffff, transparent: true, opacity: 0.5 });
-    var mapShapeMesh = new THREE.Mesh(mapShape, mapShapeMaterial);
-
-    mapShapeMesh.material.side = THREE.DoubleSide;
-    mapShapeMesh.position.z = 0;
-    mapShapeMesh.position.y = 0;
-    mapShapeMesh.rotation.x = shapeRotX * Math.PI /180;
-    mapShapeMesh.rotation.y = shapeRotY * Math.PI /180;
-
-
-    for (var vertexIndex = 0; vertexIndex < mapShapeMesh.geometry.vertices.length; vertexIndex++)
-    {
-        var localVertex = mapShapeMesh.geometry.vertices[vertexIndex].clone();
-        localVertex.z = 20;
-
-        var directionVector = new THREE.Vector3();
-        directionVector.subVectors(earthModel.position, localVertex);
-        directionVector.normalize();
-
-        var ray = new THREE.Raycaster(localVertex, directionVector);
-        var collisionResults = ray.intersectObject(earthModel);
-        numCollisions += collisionResults.length;
-
-        if (collisionResults.length > 0)
-        {
-            mapShapeMesh.geometry.vertices[vertexIndex].z = collisionResults[0].point.z + 0.1;
-        }
-
-    }
-
-    mapShapeMesh.geometry.verticesNeedUpdate = true;
-    mapShapeMesh.geometry.normalsNeedUpdate = true;
-
-    return mapShapeMesh;
-
-}
-    */
 
